@@ -1,25 +1,51 @@
 import { useRouterState } from "@tanstack/react-router";
-import { Bell, ChevronDown } from "lucide-react";
+import { Bell, ChevronDown, Menu } from "lucide-react";
 
-export function AppHeader({ onSignOut }: { onSignOut: () => void }) {
+export function AppHeader({
+  isMobileNavigationOpen,
+  onMobileNavigationOpen,
+  onSignOut,
+}: {
+  isMobileNavigationOpen: boolean;
+  onMobileNavigationOpen: () => void;
+  onSignOut: () => void;
+}) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
-  const isRoutine = pathname === "/routine";
+  const isRoutineSettings = pathname === "/routine/parametres";
+  const isRoutine = pathname.startsWith("/routine");
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6">
-      <div>
-        <h1 className="text-base leading-tight font-semibold text-gray-900">
-          {isRoutine ? "Routine du jour" : "Bonjour Pierre-Emmanuel"}
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6">
+      <div className="flex min-w-0 items-center gap-2">
+        <button
+          aria-expanded={isMobileNavigationOpen}
+          aria-label="Ouvrir la navigation"
+          className="grid size-9 shrink-0 cursor-pointer place-items-center border border-gray-200 text-gray-600 transition-colors hover:bg-gray-50 lg:hidden"
+          onClick={onMobileNavigationOpen}
+          type="button"
+        >
+          <Menu aria-hidden="true" className="size-4" />
+        </button>
+        <div className="min-w-0">
+          <h1 className="truncate text-base leading-tight font-semibold text-gray-900">
+          {isRoutineSettings
+            ? "Personnalisation de la routine"
+            : isRoutine
+              ? "Routine du jour"
+              : "Bonjour Pierre-Emmanuel"}
         </h1>
-        <p className="mt-0.5 text-xs text-gray-500">
-          {isRoutine
-            ? "Checklist quotidienne — mardi 26 août 2026"
-            : "Voici les éléments à surveiller aujourd'hui."}
+        <p className="mt-0.5 truncate text-xs text-gray-500">
+          {isRoutineSettings
+            ? "Paramètres › Routine quotidienne"
+            : isRoutine
+              ? "Checklist quotidienne"
+              : "Voici les éléments à surveiller aujourd'hui."}
         </p>
+        </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <button
           aria-label="Notifications"
           className="relative cursor-pointer p-2 transition-colors hover:bg-gray-100"

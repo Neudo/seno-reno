@@ -1,4 +1,4 @@
-import { RoutineChecklist } from "@/features/dashboard/components/RoutineChecklist";
+import { RoutineChecklist } from "@/features/routine/components/RoutineChecklist";
 
 export function RoutineOverview() {
   return <RoutineChecklist />;

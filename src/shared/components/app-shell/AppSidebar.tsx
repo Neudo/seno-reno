@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ChevronDown, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { ChevronDown, ChevronRight, X } from "lucide-react";
+import { useEffect, useId, useState } from "react";
 
 import {
   primaryNavigation,
@@ -9,7 +9,13 @@ import {
 } from "@/shared/config/navigation";
 import { cn } from "@/shared/lib/utils";
 
-function NavigationRow({ item }: { item: NavigationItem }) {
+function NavigationRow({
+  item,
+  onNavigate,
+}: {
+  item: NavigationItem;
+  onNavigate?: () => void;
+}) {
   const Icon = item.icon;
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const isCurrent = item.path === pathname;
@@ -30,7 +36,12 @@ function NavigationRow({ item }: { item: NavigationItem }) {
 
   if (item.path) {
     return (
-      <Link aria-current={isCurrent ? "page" : undefined} className={className} to={item.path}>
+      <Link
+        aria-current={isCurrent ? "page" : undefined}
+        className={className}
+        onClick={onNavigate}
+        to={item.path}
+      >
         {content}
       </Link>
     );
@@ -39,7 +50,13 @@ function NavigationRow({ item }: { item: NavigationItem }) {
   return <div className={className}>{content}</div>;
 }
 
-function NavigationGroup({ item }: { item: NavigationItem }) {
+function NavigationGroup({
+  item,
+  onNavigate,
+}: {
+  item: NavigationItem;
+  onNavigate?: () => void;
+}) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [isExpanded, setIsExpanded] = useState(false);
   const Icon = item.icon;
@@ -84,6 +101,7 @@ function NavigationGroup({ item }: { item: NavigationItem }) {
                   : "text-white/55 hover:text-white",
               )}
               key={child.path}
+              onClick={onNavigate}
               to={child.path}
             >
               {child.label}
@@ -95,29 +113,103 @@ function NavigationGroup({ item }: { item: NavigationItem }) {
   );
 }
 
-export function AppSidebar() {
+function SidebarContent({
+  onClose,
+  onNavigate,
+  showCloseButton = false,
+}: {
+  onClose?: () => void;
+  onNavigate?: () => void;
+  showCloseButton?: boolean;
+}) {
   return (
-    <aside className="hidden h-svh w-56 shrink-0 flex-col bg-seno-700 lg:flex">
+    <>
       <div className="flex h-16 items-center gap-3 border-b border-white/15 px-4 text-white">
         <span className="grid size-8 place-items-center bg-white text-[11px] font-bold text-seno-700">
           SR
         </span>
-        <span className="text-sm font-medium">SENO Rénovation</span>
+        <span className="flex-1 text-sm font-medium">SENO Rénovation</span>
+        {showCloseButton ? (
+          <button
+            aria-label="Fermer la navigation"
+            autoFocus
+            className="grid size-9 cursor-pointer place-items-center text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            onClick={onClose}
+            type="button"
+          >
+            <X aria-hidden="true" className="size-4" />
+          </button>
+        ) : null}
       </div>
 
       <nav aria-label="Navigation principale" className="pt-2">
         {primaryNavigation.map((item) =>
           item.children ? (
-            <NavigationGroup item={item} key={item.label} />
+            <NavigationGroup item={item} key={item.label} onNavigate={onNavigate} />
           ) : (
-            <NavigationRow item={item} key={item.label} />
+            <NavigationRow item={item} key={item.label} onNavigate={onNavigate} />
           ),
         )}
       </nav>
 
       <div className="mt-auto border-t border-white/15 py-2">
-        <NavigationRow item={settingsNavigation} />
+        <NavigationRow item={settingsNavigation} onNavigate={onNavigate} />
       </div>
-    </aside>
+    </>
+  );
+}
+
+export function AppSidebar({
+  isMobileOpen,
+  onMobileClose,
+}: {
+  isMobileOpen: boolean;
+  onMobileClose: () => void;
+}) {
+  const mobileNavigationId = useId();
+
+  useEffect(() => {
+    if (!isMobileOpen) {
+      return;
+    }
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onMobileClose();
+      }
+    };
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [isMobileOpen, onMobileClose]);
+
+  return (
+    <>
+      <aside className="hidden h-svh w-56 shrink-0 flex-col bg-seno-700 lg:flex">
+        <SidebarContent />
+      </aside>
+
+      {isMobileOpen ? (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            aria-label="Fermer la navigation"
+            className="absolute inset-0 cursor-pointer bg-slate-950/45"
+            onClick={onMobileClose}
+            type="button"
+          />
+          <aside
+            aria-label="Navigation principale"
+            className="relative flex h-[100dvh] w-72 max-w-[calc(100vw-2.5rem)] flex-col bg-seno-700 shadow-2xl"
+            id={mobileNavigationId}
+          >
+            <SidebarContent
+              onClose={onMobileClose}
+              onNavigate={onMobileClose}
+              showCloseButton
+            />
+          </aside>
+        </div>
+      ) : null}
+    </>
   );
 }

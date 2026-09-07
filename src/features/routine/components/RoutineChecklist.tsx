@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import {
   CheckSquare2,
   ChevronDown,
@@ -11,223 +12,19 @@ import {
   Trash2,
   Zap,
 } from "lucide-react";
+import { useState } from "react";
 
+import { useAuth } from "@/features/auth/context/AuthProvider";
+import {
+  createRoutineItem,
+  deleteRoutineItem,
+  getRoutineSnapshot,
+  resetRoutineDay,
+  toggleRoutineItemCompletion,
+  type RoutineCategory,
+  type RoutineItem,
+} from "@/features/routine/api/routine-api";
 import { cn } from "@/shared/lib/utils";
-
-type Task = {
-  id: string;
-  label: string;
-  auto?: boolean;
-  autoTag?: string;
-  autoUrgent?: boolean;
-  custom?: boolean;
-};
-
-type Section = {
-  id: string;
-  title: string;
-  color: string;
-  tasks: Task[];
-};
-
-const routineSections: Section[] = [
-  {
-    id: "agenda",
-    title: "AGENDA",
-    color: "#00365A",
-    tasks: [
-      { id: "ag1", label: "Rendez-vous du jour" },
-      { id: "ag2", label: "Contraintes horaires pro / perso" },
-    ],
-  },
-  {
-    id: "messagerie",
-    title: "MESSAGERIE",
-    color: "#1D4ED8",
-    tasks: [
-      { id: "mg1", label: "Emails" },
-      { id: "mg2", label: "Répondeur téléphonique" },
-      { id: "mg3", label: "Messenger" },
-      { id: "mg4", label: "WIX (formulaires site)" },
-      { id: "mg5", label: "Instagram (messages directs)" },
-    ],
-  },
-  {
-    id: "finances",
-    title: "FINANCES",
-    color: "#166534",
-    tasks: [
-      { id: "fi1", label: "Position des comptes" },
-      { id: "fi2", label: "Facture acompte / solde ?" },
-      { id: "fi3", label: "Paiement sous-traitant ?" },
-      { id: "fi4", label: "Justificatifs → Charlotte" },
-      {
-        id: "auto-f1",
-        label:
-          "Facture acompte 30% à envoyer — Extension Bernard, Auxerre — 18 600 €",
-        auto: true,
-        autoTag: "Facture",
-        autoUrgent: true,
-      },
-      {
-        id: "auto-f2",
-        label:
-          "Paiement sous-traitant — Plomberie Fontaine — 4 000 € — échéance aujourd'hui — Chantier Renard",
-        auto: true,
-        autoTag: "Paiement ST",
-        autoUrgent: true,
-      },
-      {
-        id: "auto-f3",
-        label:
-          "Acompte intermédiaire à recevoir — Extension Moreau, Toucy — 20 400 €",
-        auto: true,
-        autoTag: "Encaissement",
-      },
-    ],
-  },
-  {
-    id: "chantiers_cours",
-    title: "CHANTIERS EN COURS",
-    color: "#6B21A8",
-    tasks: [
-      { id: "cc1", label: "MAJ tableau Clients / Sous-traitants" },
-      { id: "cc2", label: "Vérifier marge / coûts" },
-      { id: "cc3", label: "Docs client / Sous-traitant" },
-      { id: "cc4", label: "Suivi commandes" },
-      {
-        id: "auto-cc1",
-        label:
-          "Vérifier livraison parquet chêne — BL PB-2026-1142 — Appart T3 quai Marine, Auxerre",
-        auto: true,
-        autoTag: "Suivi commande",
-      },
-      {
-        id: "auto-cc2",
-        label:
-          "Commande menuiseries extérieures en attente — Longère Aubert, Saint-Fargeau",
-        auto: true,
-        autoTag: "Suivi commande",
-        autoUrgent: true,
-      },
-      {
-        id: "auto-cc3",
-        label:
-          "Mettre à jour tableau de suivi — Rénovation Chabrier, Joigny (avancement 71%)",
-        auto: true,
-        autoTag: "MAJ tableau",
-      },
-    ],
-  },
-  {
-    id: "chantiers_signes",
-    title: "CHANTIERS SIGNÉS – NON COMMENCÉS",
-    color: "#B45309",
-    tasks: [
-      { id: "cs1", label: "Faire / envoyer bon de commande sous-traitant" },
-      { id: "cs2", label: "Construire tableau de suivi" },
-      { id: "cs3", label: "Construire tableau de commandes" },
-      {
-        id: "auto-cs1",
-        label:
-          "Envoyer bon de commande Béton Yonne — Dalle extension Bernard, Auxerre — 8 000 €",
-        auto: true,
-        autoTag: "Bon de commande",
-        autoUrgent: true,
-      },
-      {
-        id: "auto-cs2",
-        label:
-          "Construire tableau de suivi — Maison Renard, Auxerre — démarrage 7 sept.",
-        auto: true,
-        autoTag: "Tableau suivi",
-      },
-    ],
-  },
-  {
-    id: "devis",
-    title: "DEVIS EN COURS",
-    color: "#0369A1",
-    tasks: [
-      { id: "dv1", label: "Avancer / envoyer devis en cours" },
-      {
-        id: "auto-d1",
-        label:
-          "Relancer DEV-2026-0074 — Philippe Garnier, Migennes — électricité — 6 800 € — 19 jours sans réponse",
-        auto: true,
-        autoTag: "Relance devis",
-        autoUrgent: true,
-      },
-      {
-        id: "auto-d2",
-        label:
-          "Envoyer DEV-2026-0069 — Guy Lefebvre, Moutiers — plomberie — 7 400 € — finalisé le 25/08",
-        auto: true,
-        autoTag: "Devis à envoyer",
-        autoUrgent: true,
-      },
-      {
-        id: "auto-d3",
-        label:
-          "Mettre à jour devis — Faure, Sens — cuisine — choix matériaux en cours",
-        auto: true,
-        autoTag: "Devis à avancer",
-      },
-    ],
-  },
-  {
-    id: "suivi_general",
-    title: "TABLEAU SUIVI GÉNÉRAL SENO",
-    color: "#7C3AED",
-    tasks: [
-      { id: "sg1", label: "Devis à commencer" },
-      { id: "sg2", label: "Devis à relancer" },
-      {
-        id: "auto-sg1",
-        label:
-          "Relancer devis — DEV-2026-0065 — Corinne Thibaut, Chablis — SDB — 14 000 € — 5 jours sans réponse",
-        auto: true,
-        autoTag: "À relancer",
-        autoUrgent: true,
-      },
-      {
-        id: "auto-sg2",
-        label:
-          "Prospect à rappeler — Corinne Thibaut — rendez-vous à fixer début septembre",
-        auto: true,
-        autoTag: "Prospection",
-      },
-    ],
-  },
-  {
-    id: "prospection",
-    title: "PROSPECTION",
-    color: "#BE185D",
-    tasks: [
-      { id: "pr1", label: "Architectes" },
-      { id: "pr2", label: "Notaires" },
-      { id: "pr3", label: "Agents immobiliers" },
-      { id: "pr4", label: "Autres contacts" },
-    ],
-  },
-  {
-    id: "communication",
-    title: "COMMUNICATION",
-    color: "#B91C1C",
-    tasks: [
-      { id: "co1", label: "Instagram" },
-      { id: "co2", label: "Facebook" },
-      { id: "co3", label: "Site SENO" },
-    ],
-  },
-];
-
-function createSections() {
-  return routineSections.map((section) => ({
-    ...section,
-    tasks: section.tasks.map((task) => ({ ...task })),
-  }));
-}
 
 function TaskRow({
   completed,
@@ -238,21 +35,21 @@ function TaskRow({
   completed: boolean;
   onDelete?: () => void;
   onToggle: () => void;
-  task: Task;
+  task: RoutineItem;
 }) {
   return (
     <div
       className={cn(
         "group flex items-center gap-3 px-4 py-2.5 transition-colors",
         completed ? "opacity-40" : "hover:bg-gray-50",
-        task.auto && !completed && "bg-blue-50/30",
+        task.sourceTag && !completed && "bg-blue-50/30",
       )}
     >
       <button
         aria-label={
           completed
-            ? "Marquer " + task.label + " comme non terminée"
-            : "Terminer " + task.label
+            ? "Marquer " + task.title + " comme non terminée"
+            : "Terminer " + task.title
         }
         className="mt-px shrink-0 cursor-pointer text-gray-300 transition-colors hover:text-[#00365A]"
         onClick={onToggle}
@@ -272,30 +69,30 @@ function TaskRow({
           "flex-1 text-sm leading-snug",
           completed
             ? "text-gray-400 line-through"
-            : task.autoUrgent
+            : task.isUrgent
               ? "font-medium text-gray-900"
               : "text-gray-800",
         )}
       >
-        {task.label}
+        {task.title}
       </span>
       <div className="flex shrink-0 items-center gap-2">
-        {task.auto && task.autoTag && !completed ? (
+        {task.sourceTag && !completed ? (
           <span
             className={cn(
               "inline-flex shrink-0 items-center gap-1 border px-1.5 py-0.5 text-xs font-medium",
-              task.autoUrgent
+              task.isUrgent
                 ? "border-red-200 bg-red-50 text-red-700"
                 : "border-[#00365A]/20 bg-[#E8F0F6] text-[#00365A]",
             )}
           >
             <Zap aria-hidden="true" className="size-2.5" />
-            {task.autoTag}
+            {task.sourceTag}
           </span>
         ) : null}
-        {task.custom && onDelete ? (
+        {task.isCustom && onDelete ? (
           <button
-            aria-label={"Supprimer " + task.label}
+            aria-label={"Supprimer " + task.title}
             className="cursor-pointer p-1 text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
             onClick={onDelete}
             type="button"
@@ -308,44 +105,88 @@ function TaskRow({
   );
 }
 
-export function RoutineChecklist() {
-  const [sections, setSections] = useState(createSections);
-  const [completedTaskIds, setCompletedTaskIds] = useState<Set<string>>(
-    () => new Set(),
+function RoutineLoading() {
+  return (
+    <main className="min-w-0 flex-1 overflow-y-auto bg-[#F4F5F7]">
+      <div className="mx-auto max-w-3xl space-y-4 px-6 py-6">
+        <div className="h-24 animate-pulse border border-gray-200 bg-white" />
+        <div className="h-48 animate-pulse border border-gray-200 bg-white" />
+        <div className="h-48 animate-pulse border border-gray-200 bg-white" />
+      </div>
+    </main>
   );
+}
+
+export function RoutineChecklist() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [collapsedSectionIds, setCollapsedSectionIds] = useState<Set<string>>(
     () => new Set(),
   );
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
 
+  const routineQuery = useQuery({
+    enabled: Boolean(user),
+    queryFn: getRoutineSnapshot,
+    queryKey: ["routine", user?.id],
+  });
+
+  const invalidateRoutine = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["routine", user?.id] });
+  };
+
+  const completionMutation = useMutation({
+    mutationFn: toggleRoutineItemCompletion,
+    onSuccess: invalidateRoutine,
+  });
+  const createItemMutation = useMutation({
+    mutationFn: createRoutineItem,
+    onSuccess: invalidateRoutine,
+  });
+  const deleteItemMutation = useMutation({
+    mutationFn: deleteRoutineItem,
+    onSuccess: invalidateRoutine,
+  });
+  const resetDayMutation = useMutation({
+    mutationFn: resetRoutineDay,
+    onSuccess: invalidateRoutine,
+  });
+
+  if (routineQuery.isPending) {
+    return <RoutineLoading />;
+  }
+
+  if (routineQuery.isError || !routineQuery.data || !user) {
+    return (
+      <main className="min-w-0 flex-1 overflow-y-auto bg-[#F4F5F7]">
+        <div className="mx-auto max-w-3xl px-6 py-6">
+          <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            Impossible de charger la routine. Réessaie dans un instant.
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const { completedItemIds, routineDate, sections } = routineQuery.data;
+  const userId = user.id;
   const totalTasks = sections.reduce(
-    (count, section) => count + section.tasks.length,
+    (count, section) => count + section.items.length,
     0,
   );
-  const completedTasks = completedTaskIds.size;
+  const completedTasks = completedItemIds.size;
   const progress =
     totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
   const urgentTasks = sections.reduce(
     (count, section) =>
       count +
-      section.tasks.filter(
-        (task) => task.autoUrgent && !completedTaskIds.has(task.id),
+      section.items.filter(
+        (item) => item.isUrgent && !completedItemIds.has(item.id),
       ).length,
     0,
   );
-
-  function toggleTask(taskId: string) {
-    setCompletedTaskIds((currentIds) => {
-      const nextIds = new Set(currentIds);
-      if (nextIds.has(taskId)) {
-        nextIds.delete(taskId);
-      } else {
-        nextIds.add(taskId);
-      }
-      return nextIds;
-    });
-  }
 
   function toggleCollapsedSection(sectionId: string) {
     setCollapsedSectionIds((currentIds) => {
@@ -359,64 +200,48 @@ export function RoutineChecklist() {
     });
   }
 
-  function toggleAllTasks(section: Section) {
-    const taskIds = section.tasks.map((task) => task.id);
-    const allCompleted = taskIds.every((taskId) =>
-      completedTaskIds.has(taskId),
-    );
-
-    setCompletedTaskIds((currentIds) => {
-      const nextIds = new Set(currentIds);
-      taskIds.forEach((taskId) => {
-        if (allCompleted) {
-          nextIds.delete(taskId);
-        } else {
-          nextIds.add(taskId);
-        }
-      });
-      return nextIds;
+  function toggleTask(item: RoutineItem) {
+    void completionMutation.mutateAsync({
+      completed: completedItemIds.has(item.id),
+      itemId: item.id,
+      routineDate,
+      userId,
     });
   }
 
-  function addTask(sectionId: string) {
-    const label = drafts[sectionId]?.trim();
-    if (!label) {
+  function toggleAllTasks(section: RoutineCategory) {
+    const allCompleted = section.items.every((item) =>
+      completedItemIds.has(item.id),
+    );
+    void Promise.all(
+      section.items.map((item) =>
+        completionMutation.mutateAsync({
+          completed: allCompleted,
+          itemId: item.id,
+          routineDate,
+          userId,
+        }),
+      ),
+    );
+  }
+
+  function addTask(section: RoutineCategory) {
+    const title = drafts[section.id]?.trim();
+    if (!title) {
       return;
     }
 
-    setSections((currentSections) =>
-      currentSections.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              tasks: [
-                ...section.tasks,
-                { id: "custom-" + Date.now(), label, custom: true },
-              ],
-            }
-          : section,
-      ),
-    );
-    setDrafts((currentDrafts) => ({ ...currentDrafts, [sectionId]: "" }));
-    setEditingSectionId(null);
-  }
-
-  function deleteTask(sectionId: string, taskId: string) {
-    setSections((currentSections) =>
-      currentSections.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              tasks: section.tasks.filter((task) => task.id !== taskId),
-            }
-          : section,
-      ),
-    );
-    setCompletedTaskIds((currentIds) => {
-      const nextIds = new Set(currentIds);
-      nextIds.delete(taskId);
-      return nextIds;
-    });
+    void createItemMutation
+      .mutateAsync({
+        categoryId: section.id,
+        position: section.items.length,
+        title,
+        userId,
+      })
+      .then(() => {
+        setDrafts((currentDrafts) => ({ ...currentDrafts, [section.id]: "" }));
+        setEditingSectionId(null);
+      });
   }
 
   return (
@@ -446,8 +271,16 @@ export function RoutineChecklist() {
                 </span>
               ) : null}
               <button
-                className="flex cursor-pointer items-center gap-1.5 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:border-[#00365A] hover:text-[#00365A]"
-                onClick={() => setCompletedTaskIds(new Set())}
+                className="flex cursor-pointer items-center gap-1.5 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:border-[#00365A] hover:text-[#00365A] disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={resetDayMutation.isPending}
+                onClick={() =>
+                  void resetDayMutation.mutateAsync({
+                    itemIds: sections.flatMap((section) =>
+                      section.items.map((item) => item.id),
+                    ),
+                    routineDate,
+                  })
+                }
                 type="button"
               >
                 <RotateCcw aria-hidden="true" className="size-[11px]" />
@@ -455,6 +288,7 @@ export function RoutineChecklist() {
               </button>
               <button
                 className="flex cursor-pointer items-center gap-1.5 border border-[#00365A] px-3 py-1.5 text-xs font-medium text-[#00365A] transition-colors hover:bg-[#00365A] hover:text-white"
+                onClick={() => void navigate({ to: "/routine/parametres" })}
                 type="button"
               >
                 <SlidersHorizontal aria-hidden="true" className="size-[11px]" />
@@ -471,11 +305,11 @@ export function RoutineChecklist() {
         </section>
 
         {sections.map((section) => {
-          const completedCount = section.tasks.filter((task) =>
-            completedTaskIds.has(task.id),
+          const completedCount = section.items.filter((item) =>
+            completedItemIds.has(item.id),
           ).length;
           const allCompleted =
-            section.tasks.length > 0 && completedCount === section.tasks.length;
+            section.items.length > 0 && completedCount === section.items.length;
           const partiallyCompleted = completedCount > 0 && !allCompleted;
           const isCollapsed = collapsedSectionIds.has(section.id);
           const isAddingTask = editingSectionId === section.id;
@@ -493,7 +327,7 @@ export function RoutineChecklist() {
                   aria-label={
                     (allCompleted
                       ? "Tout décocher dans "
-                      : "Tout cocher dans ") + section.title
+                      : "Tout cocher dans ") + section.name
                   }
                   className="shrink-0 cursor-pointer"
                   onClick={() => toggleAllTasks(section)}
@@ -523,7 +357,7 @@ export function RoutineChecklist() {
                   type="button"
                 >
                   <span className="text-xs font-bold tracking-widest text-gray-700">
-                    {section.title}
+                    {section.name}
                   </span>
                   <span
                     className="border px-1.5 py-0.5 font-mono text-xs font-medium"
@@ -537,12 +371,12 @@ export function RoutineChecklist() {
                       color: allCompleted ? "#166534" : section.color,
                     }}
                   >
-                    {completedCount}/{section.tasks.length}
+                    {completedCount}/{section.items.length}
                   </span>
                 </button>
                 <button
                   aria-label={
-                    (isCollapsed ? "Déplier " : "Replier ") + section.title
+                    (isCollapsed ? "Déplier " : "Replier ") + section.name
                   }
                   className="shrink-0 cursor-pointer text-gray-400"
                   onClick={() => toggleCollapsedSection(section.id)}
@@ -559,17 +393,17 @@ export function RoutineChecklist() {
               {!isCollapsed ? (
                 <>
                   <div className="divide-y divide-gray-50">
-                    {section.tasks.map((task) => (
+                    {section.items.map((item) => (
                       <TaskRow
-                        completed={completedTaskIds.has(task.id)}
-                        key={task.id}
+                        completed={completedItemIds.has(item.id)}
+                        key={item.id}
                         onDelete={
-                          task.custom
-                            ? () => deleteTask(section.id, task.id)
+                          item.isCustom
+                            ? () => void deleteItemMutation.mutateAsync(item.id)
                             : undefined
                         }
-                        onToggle={() => toggleTask(task.id)}
-                        task={task}
+                        onToggle={() => toggleTask(item)}
+                        task={item}
                       />
                     ))}
                   </div>
@@ -577,7 +411,7 @@ export function RoutineChecklist() {
                     {isAddingTask ? (
                       <div className="flex items-center gap-2">
                         <input
-                          aria-label={"Nouvelle tâche dans " + section.title}
+                          aria-label={"Nouvelle tâche dans " + section.name}
                           autoFocus
                           className="flex-1 border border-[#00365A] bg-white px-2.5 py-1.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none"
                           onChange={(event) =>
@@ -588,7 +422,7 @@ export function RoutineChecklist() {
                           }
                           onKeyDown={(event) => {
                             if (event.key === "Enter") {
-                              addTask(section.id);
+                              addTask(section);
                             }
                             if (event.key === "Escape") {
                               setEditingSectionId(null);
@@ -599,8 +433,9 @@ export function RoutineChecklist() {
                           value={drafts[section.id] ?? ""}
                         />
                         <button
-                          className="cursor-pointer bg-[#00365A] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#004A7A]"
-                          onClick={() => addTask(section.id)}
+                          className="cursor-pointer bg-[#00365A] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#004A7A] disabled:cursor-not-allowed disabled:opacity-50"
+                          disabled={createItemMutation.isPending}
+                          onClick={() => addTask(section)}
                           type="button"
                         >
                           Ajouter

@@ -28,6 +28,7 @@ import { Route as AuthenticatedRemboursementsPeRouteImport } from './routes/_aut
 import { Route as AuthenticatedRoutineRouteImport } from './routes/_authenticated/routine'
 import { Route as AuthenticatedStatistiquesRouteImport } from './routes/_authenticated/statistiques'
 import { Route as AuthenticatedTresorerieRouteImport } from './routes/_authenticated/tresorerie'
+import { Route as AuthenticatedRoutineParametresRouteImport } from './routes/_authenticated/routine.parametres'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -128,6 +129,12 @@ const AuthenticatedTresorerieRoute = AuthenticatedTresorerieRouteImport.update({
   path: '/tresorerie',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedRoutineParametresRoute =
+  AuthenticatedRoutineParametresRouteImport.update({
+    id: '/parametres',
+    path: '/parametres',
+    getParentRoute: () => AuthenticatedRoutineRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -145,9 +152,10 @@ export interface FileRoutesByFullPath {
   '/planning': typeof AuthenticatedPlanningRoute
   '/prospection': typeof AuthenticatedProspectionRoute
   '/remboursements-pe': typeof AuthenticatedRemboursementsPeRoute
-  '/routine': typeof AuthenticatedRoutineRoute
+  '/routine': typeof AuthenticatedRoutineRouteWithChildren
   '/statistiques': typeof AuthenticatedStatistiquesRoute
   '/tresorerie': typeof AuthenticatedTresorerieRoute
+  '/routine/parametres': typeof AuthenticatedRoutineParametresRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -165,9 +173,10 @@ export interface FileRoutesByTo {
   '/planning': typeof AuthenticatedPlanningRoute
   '/prospection': typeof AuthenticatedProspectionRoute
   '/remboursements-pe': typeof AuthenticatedRemboursementsPeRoute
-  '/routine': typeof AuthenticatedRoutineRoute
+  '/routine': typeof AuthenticatedRoutineRouteWithChildren
   '/statistiques': typeof AuthenticatedStatistiquesRoute
   '/tresorerie': typeof AuthenticatedTresorerieRoute
+  '/routine/parametres': typeof AuthenticatedRoutineParametresRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -187,9 +196,10 @@ export interface FileRoutesById {
   '/_authenticated/planning': typeof AuthenticatedPlanningRoute
   '/_authenticated/prospection': typeof AuthenticatedProspectionRoute
   '/_authenticated/remboursements-pe': typeof AuthenticatedRemboursementsPeRoute
-  '/_authenticated/routine': typeof AuthenticatedRoutineRoute
+  '/_authenticated/routine': typeof AuthenticatedRoutineRouteWithChildren
   '/_authenticated/statistiques': typeof AuthenticatedStatistiquesRoute
   '/_authenticated/tresorerie': typeof AuthenticatedTresorerieRoute
+  '/_authenticated/routine/parametres': typeof AuthenticatedRoutineParametresRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/routine'
     | '/statistiques'
     | '/tresorerie'
+    | '/routine/parametres'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/routine'
     | '/statistiques'
     | '/tresorerie'
+    | '/routine/parametres'
   id:
     | '__root__'
     | '/'
@@ -253,6 +265,7 @@ export interface FileRouteTypes {
     | '/_authenticated/routine'
     | '/_authenticated/statistiques'
     | '/_authenticated/tresorerie'
+    | '/_authenticated/routine/parametres'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -396,8 +409,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTresorerieRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/routine/parametres': {
+      id: '/_authenticated/routine/parametres'
+      path: '/parametres'
+      fullPath: '/routine/parametres'
+      preLoaderRoute: typeof AuthenticatedRoutineParametresRouteImport
+      parentRoute: typeof AuthenticatedRoutineRoute
+    }
   }
 }
+
+interface AuthenticatedRoutineRouteChildren {
+  AuthenticatedRoutineParametresRoute: typeof AuthenticatedRoutineParametresRoute
+}
+
+const AuthenticatedRoutineRouteChildren: AuthenticatedRoutineRouteChildren = {
+  AuthenticatedRoutineParametresRoute: AuthenticatedRoutineParametresRoute,
+}
+
+const AuthenticatedRoutineRouteWithChildren =
+  AuthenticatedRoutineRoute._addFileChildren(AuthenticatedRoutineRouteChildren)
 
 interface AuthenticatedRouteChildren {
   AuthenticatedBasePrixRoute: typeof AuthenticatedBasePrixRoute
@@ -413,7 +444,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPlanningRoute: typeof AuthenticatedPlanningRoute
   AuthenticatedProspectionRoute: typeof AuthenticatedProspectionRoute
   AuthenticatedRemboursementsPeRoute: typeof AuthenticatedRemboursementsPeRoute
-  AuthenticatedRoutineRoute: typeof AuthenticatedRoutineRoute
+  AuthenticatedRoutineRoute: typeof AuthenticatedRoutineRouteWithChildren
   AuthenticatedStatistiquesRoute: typeof AuthenticatedStatistiquesRoute
   AuthenticatedTresorerieRoute: typeof AuthenticatedTresorerieRoute
 }
@@ -432,7 +463,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPlanningRoute: AuthenticatedPlanningRoute,
   AuthenticatedProspectionRoute: AuthenticatedProspectionRoute,
   AuthenticatedRemboursementsPeRoute: AuthenticatedRemboursementsPeRoute,
-  AuthenticatedRoutineRoute: AuthenticatedRoutineRoute,
+  AuthenticatedRoutineRoute: AuthenticatedRoutineRouteWithChildren,
   AuthenticatedStatistiquesRoute: AuthenticatedStatistiquesRoute,
   AuthenticatedTresorerieRoute: AuthenticatedTresorerieRoute,
 }
