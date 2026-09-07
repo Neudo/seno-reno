@@ -10,17 +10,32 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as SigninRouteImport } from './routes/signin'
+import { Route as AuthenticatedBasePrixRouteImport } from './routes/_authenticated/base-prix'
+import { Route as AuthenticatedChantiersRouteImport } from './routes/_authenticated/chantiers'
+import { Route as AuthenticatedChargesFixesRouteImport } from './routes/_authenticated/charges-fixes'
+import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDevisRouteImport } from './routes/_authenticated/devis'
+import { Route as AuthenticatedFinancesRouteImport } from './routes/_authenticated/finances'
+import { Route as AuthenticatedGenerationBdcRouteImport } from './routes/_authenticated/generation-bdc'
+import { Route as AuthenticatedMargesRouteImport } from './routes/_authenticated/marges'
+import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
+import { Route as AuthenticatedPlanningRouteImport } from './routes/_authenticated/planning'
+import { Route as AuthenticatedProspectionRouteImport } from './routes/_authenticated/prospection'
+import { Route as AuthenticatedRemboursementsPeRouteImport } from './routes/_authenticated/remboursements-pe'
+import { Route as AuthenticatedRoutineRouteImport } from './routes/_authenticated/routine'
+import { Route as AuthenticatedStatistiquesRouteImport } from './routes/_authenticated/statistiques'
+import { Route as AuthenticatedTresorerieRouteImport } from './routes/_authenticated/tresorerie'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SigninRoute = SigninRouteImport.update({
@@ -28,34 +43,221 @@ const SigninRoute = SigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedBasePrixRoute = AuthenticatedBasePrixRouteImport.update({
+  id: '/base-prix',
+  path: '/base-prix',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedChantiersRoute = AuthenticatedChantiersRouteImport.update({
+  id: '/chantiers',
+  path: '/chantiers',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedChargesFixesRoute =
+  AuthenticatedChargesFixesRouteImport.update({
+    id: '/charges-fixes',
+    path: '/charges-fixes',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedClientsRoute = AuthenticatedClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedDevisRoute = AuthenticatedDevisRouteImport.update({
+  id: '/devis',
+  path: '/devis',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFinancesRoute = AuthenticatedFinancesRouteImport.update({
+  id: '/finances',
+  path: '/finances',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedGenerationBdcRoute =
+  AuthenticatedGenerationBdcRouteImport.update({
+    id: '/generation-bdc',
+    path: '/generation-bdc',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMargesRoute = AuthenticatedMargesRouteImport.update({
+  id: '/marges',
+  path: '/marges',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedParametresRoute = AuthenticatedParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPlanningRoute = AuthenticatedPlanningRouteImport.update({
+  id: '/planning',
+  path: '/planning',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedProspectionRoute =
+  AuthenticatedProspectionRouteImport.update({
+    id: '/prospection',
+    path: '/prospection',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedRemboursementsPeRoute =
+  AuthenticatedRemboursementsPeRouteImport.update({
+    id: '/remboursements-pe',
+    path: '/remboursements-pe',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedRoutineRoute = AuthenticatedRoutineRouteImport.update({
+  id: '/routine',
+  path: '/routine',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedStatistiquesRoute =
+  AuthenticatedStatistiquesRouteImport.update({
+    id: '/statistiques',
+    path: '/statistiques',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedTresorerieRoute = AuthenticatedTresorerieRouteImport.update({
+  id: '/tresorerie',
+  path: '/tresorerie',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
+  '/base-prix': typeof AuthenticatedBasePrixRoute
+  '/chantiers': typeof AuthenticatedChantiersRoute
+  '/charges-fixes': typeof AuthenticatedChargesFixesRoute
+  '/clients': typeof AuthenticatedClientsRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/devis': typeof AuthenticatedDevisRoute
+  '/finances': typeof AuthenticatedFinancesRoute
+  '/generation-bdc': typeof AuthenticatedGenerationBdcRoute
+  '/marges': typeof AuthenticatedMargesRoute
+  '/parametres': typeof AuthenticatedParametresRoute
+  '/planning': typeof AuthenticatedPlanningRoute
+  '/prospection': typeof AuthenticatedProspectionRoute
+  '/remboursements-pe': typeof AuthenticatedRemboursementsPeRoute
+  '/routine': typeof AuthenticatedRoutineRoute
+  '/statistiques': typeof AuthenticatedStatistiquesRoute
+  '/tresorerie': typeof AuthenticatedTresorerieRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
+  '/base-prix': typeof AuthenticatedBasePrixRoute
+  '/chantiers': typeof AuthenticatedChantiersRoute
+  '/charges-fixes': typeof AuthenticatedChargesFixesRoute
+  '/clients': typeof AuthenticatedClientsRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/devis': typeof AuthenticatedDevisRoute
+  '/finances': typeof AuthenticatedFinancesRoute
+  '/generation-bdc': typeof AuthenticatedGenerationBdcRoute
+  '/marges': typeof AuthenticatedMargesRoute
+  '/parametres': typeof AuthenticatedParametresRoute
+  '/planning': typeof AuthenticatedPlanningRoute
+  '/prospection': typeof AuthenticatedProspectionRoute
+  '/remboursements-pe': typeof AuthenticatedRemboursementsPeRoute
+  '/routine': typeof AuthenticatedRoutineRoute
+  '/statistiques': typeof AuthenticatedStatistiquesRoute
+  '/tresorerie': typeof AuthenticatedTresorerieRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/signin': typeof SigninRoute
+  '/_authenticated/base-prix': typeof AuthenticatedBasePrixRoute
+  '/_authenticated/chantiers': typeof AuthenticatedChantiersRoute
+  '/_authenticated/charges-fixes': typeof AuthenticatedChargesFixesRoute
+  '/_authenticated/clients': typeof AuthenticatedClientsRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/devis': typeof AuthenticatedDevisRoute
+  '/_authenticated/finances': typeof AuthenticatedFinancesRoute
+  '/_authenticated/generation-bdc': typeof AuthenticatedGenerationBdcRoute
+  '/_authenticated/marges': typeof AuthenticatedMargesRoute
+  '/_authenticated/parametres': typeof AuthenticatedParametresRoute
+  '/_authenticated/planning': typeof AuthenticatedPlanningRoute
+  '/_authenticated/prospection': typeof AuthenticatedProspectionRoute
+  '/_authenticated/remboursements-pe': typeof AuthenticatedRemboursementsPeRoute
+  '/_authenticated/routine': typeof AuthenticatedRoutineRoute
+  '/_authenticated/statistiques': typeof AuthenticatedStatistiquesRoute
+  '/_authenticated/tresorerie': typeof AuthenticatedTresorerieRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/signin'
+  fullPaths:
+    | '/'
+    | '/signin'
+    | '/base-prix'
+    | '/chantiers'
+    | '/charges-fixes'
+    | '/clients'
+    | '/dashboard'
+    | '/devis'
+    | '/finances'
+    | '/generation-bdc'
+    | '/marges'
+    | '/parametres'
+    | '/planning'
+    | '/prospection'
+    | '/remboursements-pe'
+    | '/routine'
+    | '/statistiques'
+    | '/tresorerie'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/signin'
-  id: '__root__' | '/' | '/dashboard' | '/signin'
+  to:
+    | '/'
+    | '/signin'
+    | '/base-prix'
+    | '/chantiers'
+    | '/charges-fixes'
+    | '/clients'
+    | '/dashboard'
+    | '/devis'
+    | '/finances'
+    | '/generation-bdc'
+    | '/marges'
+    | '/parametres'
+    | '/planning'
+    | '/prospection'
+    | '/remboursements-pe'
+    | '/routine'
+    | '/statistiques'
+    | '/tresorerie'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/signin'
+    | '/_authenticated/base-prix'
+    | '/_authenticated/chantiers'
+    | '/_authenticated/charges-fixes'
+    | '/_authenticated/clients'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/devis'
+    | '/_authenticated/finances'
+    | '/_authenticated/generation-bdc'
+    | '/_authenticated/marges'
+    | '/_authenticated/parametres'
+    | '/_authenticated/planning'
+    | '/_authenticated/prospection'
+    | '/_authenticated/remboursements-pe'
+    | '/_authenticated/routine'
+    | '/_authenticated/statistiques'
+    | '/_authenticated/tresorerie'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   SigninRoute: typeof SigninRoute
 }
 
@@ -68,11 +270,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signin': {
@@ -82,12 +284,166 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/base-prix': {
+      id: '/_authenticated/base-prix'
+      path: '/base-prix'
+      fullPath: '/base-prix'
+      preLoaderRoute: typeof AuthenticatedBasePrixRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/chantiers': {
+      id: '/_authenticated/chantiers'
+      path: '/chantiers'
+      fullPath: '/chantiers'
+      preLoaderRoute: typeof AuthenticatedChantiersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/charges-fixes': {
+      id: '/_authenticated/charges-fixes'
+      path: '/charges-fixes'
+      fullPath: '/charges-fixes'
+      preLoaderRoute: typeof AuthenticatedChargesFixesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/clients': {
+      id: '/_authenticated/clients'
+      path: '/clients'
+      fullPath: '/clients'
+      preLoaderRoute: typeof AuthenticatedClientsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/devis': {
+      id: '/_authenticated/devis'
+      path: '/devis'
+      fullPath: '/devis'
+      preLoaderRoute: typeof AuthenticatedDevisRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/finances': {
+      id: '/_authenticated/finances'
+      path: '/finances'
+      fullPath: '/finances'
+      preLoaderRoute: typeof AuthenticatedFinancesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/generation-bdc': {
+      id: '/_authenticated/generation-bdc'
+      path: '/generation-bdc'
+      fullPath: '/generation-bdc'
+      preLoaderRoute: typeof AuthenticatedGenerationBdcRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/marges': {
+      id: '/_authenticated/marges'
+      path: '/marges'
+      fullPath: '/marges'
+      preLoaderRoute: typeof AuthenticatedMargesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/parametres': {
+      id: '/_authenticated/parametres'
+      path: '/parametres'
+      fullPath: '/parametres'
+      preLoaderRoute: typeof AuthenticatedParametresRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/planning': {
+      id: '/_authenticated/planning'
+      path: '/planning'
+      fullPath: '/planning'
+      preLoaderRoute: typeof AuthenticatedPlanningRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/prospection': {
+      id: '/_authenticated/prospection'
+      path: '/prospection'
+      fullPath: '/prospection'
+      preLoaderRoute: typeof AuthenticatedProspectionRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/remboursements-pe': {
+      id: '/_authenticated/remboursements-pe'
+      path: '/remboursements-pe'
+      fullPath: '/remboursements-pe'
+      preLoaderRoute: typeof AuthenticatedRemboursementsPeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/routine': {
+      id: '/_authenticated/routine'
+      path: '/routine'
+      fullPath: '/routine'
+      preLoaderRoute: typeof AuthenticatedRoutineRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/statistiques': {
+      id: '/_authenticated/statistiques'
+      path: '/statistiques'
+      fullPath: '/statistiques'
+      preLoaderRoute: typeof AuthenticatedStatistiquesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tresorerie': {
+      id: '/_authenticated/tresorerie'
+      path: '/tresorerie'
+      fullPath: '/tresorerie'
+      preLoaderRoute: typeof AuthenticatedTresorerieRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedBasePrixRoute: typeof AuthenticatedBasePrixRoute
+  AuthenticatedChantiersRoute: typeof AuthenticatedChantiersRoute
+  AuthenticatedChargesFixesRoute: typeof AuthenticatedChargesFixesRoute
+  AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDevisRoute: typeof AuthenticatedDevisRoute
+  AuthenticatedFinancesRoute: typeof AuthenticatedFinancesRoute
+  AuthenticatedGenerationBdcRoute: typeof AuthenticatedGenerationBdcRoute
+  AuthenticatedMargesRoute: typeof AuthenticatedMargesRoute
+  AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
+  AuthenticatedPlanningRoute: typeof AuthenticatedPlanningRoute
+  AuthenticatedProspectionRoute: typeof AuthenticatedProspectionRoute
+  AuthenticatedRemboursementsPeRoute: typeof AuthenticatedRemboursementsPeRoute
+  AuthenticatedRoutineRoute: typeof AuthenticatedRoutineRoute
+  AuthenticatedStatistiquesRoute: typeof AuthenticatedStatistiquesRoute
+  AuthenticatedTresorerieRoute: typeof AuthenticatedTresorerieRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedBasePrixRoute: AuthenticatedBasePrixRoute,
+  AuthenticatedChantiersRoute: AuthenticatedChantiersRoute,
+  AuthenticatedChargesFixesRoute: AuthenticatedChargesFixesRoute,
+  AuthenticatedClientsRoute: AuthenticatedClientsRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDevisRoute: AuthenticatedDevisRoute,
+  AuthenticatedFinancesRoute: AuthenticatedFinancesRoute,
+  AuthenticatedGenerationBdcRoute: AuthenticatedGenerationBdcRoute,
+  AuthenticatedMargesRoute: AuthenticatedMargesRoute,
+  AuthenticatedParametresRoute: AuthenticatedParametresRoute,
+  AuthenticatedPlanningRoute: AuthenticatedPlanningRoute,
+  AuthenticatedProspectionRoute: AuthenticatedProspectionRoute,
+  AuthenticatedRemboursementsPeRoute: AuthenticatedRemboursementsPeRoute,
+  AuthenticatedRoutineRoute: AuthenticatedRoutineRoute,
+  AuthenticatedStatistiquesRoute: AuthenticatedStatistiquesRoute,
+  AuthenticatedTresorerieRoute: AuthenticatedTresorerieRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   SigninRoute: SigninRoute,
 }
 export const routeTree = rootRouteImport
