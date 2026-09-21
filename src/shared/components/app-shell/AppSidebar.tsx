@@ -2,8 +2,10 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 
+import logoUrl from "@/assets/logo.png";
 import {
   primaryNavigation,
+  quickNavigation,
   settingsNavigation,
   type NavigationItem,
 } from "@/shared/config/navigation";
@@ -29,9 +31,11 @@ function NavigationRow({
 
   const className = cn(
     "flex h-10 items-center gap-3 border-l-2 px-4 text-sm font-medium transition-colors",
-    isCurrent
-      ? "border-white bg-white/15 text-white"
-      : "border-transparent text-white/60 hover:bg-white/8 hover:text-white",
+    item.tone === "urgent"
+      ? "mx-3 h-9 border border-[#D7BF54]/45 bg-[#D7BF54]/15 px-3 text-[#F6D95A] hover:bg-[#D7BF54]/22"
+      : isCurrent
+        ? "border-white bg-white/15 text-white"
+        : "border-transparent text-white/60 hover:bg-white/8 hover:text-white",
   );
 
   if (item.path) {
@@ -125,9 +129,7 @@ function SidebarContent({
   return (
     <>
       <div className="flex h-16 items-center gap-3 border-b border-white/15 px-4 text-white">
-        <span className="grid size-8 place-items-center bg-white text-[11px] font-bold text-seno-700">
-          SR
-        </span>
+        <img alt="" className="size-8 object-contain" src={logoUrl} />
         <span className="flex-1 text-sm font-medium">SENO Rénovation</span>
         {showCloseButton ? (
           <button
@@ -143,6 +145,10 @@ function SidebarContent({
       </div>
 
       <nav aria-label="Navigation principale" className="pt-2">
+        {quickNavigation.map((item) => (
+          <NavigationRow item={item} key={item.label} onNavigate={onNavigate} />
+        ))}
+        <div aria-hidden="true" className="mx-4 my-3 border-t border-white/15" />
         {primaryNavigation.map((item) =>
           item.children ? (
             <NavigationGroup item={item} key={item.label} onNavigate={onNavigate} />

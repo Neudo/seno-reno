@@ -37,6 +37,8 @@ function TaskRow({
   onToggle: () => void;
   task: RoutineItem;
 }) {
+  const taskInputId = `routine-task-${task.id}`;
+
   return (
     <div
       className={cn(
@@ -45,15 +47,21 @@ function TaskRow({
         task.sourceTag && !completed && "bg-blue-50/30",
       )}
     >
-      <button
+      <input
         aria-label={
           completed
             ? "Marquer " + task.title + " comme non terminée"
             : "Terminer " + task.title
         }
-        className="mt-px shrink-0 cursor-pointer text-gray-300 transition-colors hover:text-[#00365A]"
-        onClick={onToggle}
-        type="button"
+        checked={completed}
+        className="peer sr-only"
+        id={taskInputId}
+        onChange={onToggle}
+        type="checkbox"
+      />
+      <label
+        className="mt-px shrink-0 cursor-pointer text-gray-300 transition-colors hover:text-[#00365A] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#00365A]"
+        htmlFor={taskInputId}
       >
         {completed ? (
           <CheckSquare2
@@ -63,19 +71,20 @@ function TaskRow({
         ) : (
           <Square aria-hidden="true" className="size-[15px]" />
         )}
-      </button>
-      <span
+      </label>
+      <label
         className={cn(
-          "flex-1 text-sm leading-snug",
+          "flex-1 cursor-pointer text-sm leading-snug",
           completed
             ? "text-gray-400 line-through"
             : task.isUrgent
               ? "font-medium text-gray-900"
-              : "text-gray-800",
+            : "text-gray-800",
         )}
+        htmlFor={taskInputId}
       >
         {task.title}
-      </span>
+      </label>
       <div className="flex shrink-0 items-center gap-2">
         {task.sourceTag && !completed ? (
           <span

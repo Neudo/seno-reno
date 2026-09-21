@@ -8,6 +8,7 @@ import type {
   BdcLine,
   BdcLot,
   ParsedTolteckQuote,
+  ParsedTolteckQuoteSummary,
 } from "@/features/outils/bdc/types";
 
 GlobalWorkerOptions.workerSrc = pdfWorker;
@@ -175,6 +176,79 @@ function extractMetadata(rows: TextRow[], fileName: string) {
   };
 }
 
+function parseFrenchAmount(value: string) {
+  const match = value.match(
+    /(?:\d{1,3}(?:[\s\u00a0\u202f.]\d{3})+|\d+)(?:[,.]\d{1,2})?/u,
+  );
+
+  if (!match?.[0]) {
+    return null;
+  }
+
+  const normalized = match[0]
+    .replace(/[\s\u00a0\u202f.]/gu, "")
+    .replace(",", ".");
+  const amount = Number(normalized);
+
+  return Number.isFinite(amount) ? amount : null;
+}
+
+function extractTotal(rows: TextRow[], label: "HT" | "TTC") {
+  const totalRow = [...rows]
+    .reverse()
+    .find((row) => new RegExp(`Total\\s+${label}`, "iu").test(row.text));
+
+  if (!totalRow) {
+    return null;
+  }
+
+  const labelIndex = totalRow.text.search(new RegExp(`Total\\s+${label}`, "iu"));
+  return parseFrenchAmount(totalRow.text.slice(labelIndex));
+}
+
+function buildSummary(rows: TextRow[], fileName: string): ParsedTolteckQuoteSummary {
+  return {
+    ...extractMetadata(rows, fileName),
+    totalHt: extractTotal(rows, "HT"),
+    totalTtc: extractTotal(rows, "TTC"),
+  };
+}
+
+async function extractRowsFromPdf(file: File) {
+  const loadingTask = getDocument({
+    data: new Uint8Array(await file.arrayBuffer()),
+  });
+  const document = await loadingTask.promise;
+  const rows: TextRow[] = [];
+
+  try {
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber);
+      const viewport = page.getViewport({ scale: 1 });
+      const content = await page.getTextContent();
+      const positionedItems = content.items.flatMap((item) => {
+        if (!("str" in item) || !item.str.trim()) {
+          return [];
+        }
+
+        return [
+          {
+            text: item.str,
+            x: item.transform[4],
+            y: item.transform[5],
+          },
+        ];
+      });
+
+      rows.push(...buildRows(pageNumber, viewport.width, positionedItems));
+    }
+  } finally {
+    await loadingTask.destroy();
+  }
+
+  return rows;
+}
+
 function extractLots(rows: TextRow[]) {
   const lots: BdcLot[] = [];
   let currentLot: BdcLot | null = null;
@@ -313,36 +387,7 @@ function extractLots(rows: TextRow[]) {
 export async function parseTolteckQuote(
   file: File,
 ): Promise<ParsedTolteckQuote> {
-  const loadingTask = getDocument({
-    data: new Uint8Array(await file.arrayBuffer()),
-  });
-  const document = await loadingTask.promise;
-  const rows: TextRow[] = [];
-
-  try {
-    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
-      const page = await document.getPage(pageNumber);
-      const viewport = page.getViewport({ scale: 1 });
-      const content = await page.getTextContent();
-      const positionedItems = content.items.flatMap((item) => {
-        if (!("str" in item) || !item.str.trim()) {
-          return [];
-        }
-
-        return [
-          {
-            text: item.str,
-            x: item.transform[4],
-            y: item.transform[5],
-          },
-        ];
-      });
-
-      rows.push(...buildRows(pageNumber, viewport.width, positionedItems));
-    }
-  } finally {
-    await loadingTask.destroy();
-  }
+  const rows = await extractRowsFromPdf(file);
 
   const lots = extractLots(rows);
 
@@ -353,7 +398,13 @@ export async function parseTolteckQuote(
   }
 
   return {
-    ...extractMetadata(rows, file.name),
+    ...buildSummary(rows, file.name),
     lots,
   };
+}
+
+export async function parseTolteckQuoteSummary(
+  file: File,
+): Promise<ParsedTolteckQuoteSummary> {
+  return buildSummary(await extractRowsFromPdf(file), file.name);
 }

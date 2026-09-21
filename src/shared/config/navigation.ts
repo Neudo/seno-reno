@@ -7,12 +7,16 @@ import {
   HardHat,
   Home,
   Settings,
+  ShoppingBasket,
   UsersRound,
   Wrench,
+  Zap,
 } from "lucide-react";
 
 export type AppPath =
   | "/dashboard"
+  | "/urgent"
+  | "/achats"
   | "/routine"
   | "/clients"
   | "/prospection"
@@ -39,7 +43,13 @@ export type NavigationItem = {
   icon: LucideIcon;
   label: string;
   path?: AppPath;
+  tone?: "urgent";
 };
+
+export const quickNavigation: NavigationItem[] = [
+  { icon: Zap, label: "URGENT", path: "/urgent", tone: "urgent" },
+  { icon: ShoppingBasket, label: "Achats", path: "/achats" },
+];
 
 export const primaryNavigation: NavigationItem[] = [
   { icon: Home, label: "Accueil", path: "/dashboard" },

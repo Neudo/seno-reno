@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as SigninRouteImport } from './routes/signin'
+import { Route as AuthenticatedAchatsRouteImport } from './routes/_authenticated/achats'
 import { Route as AuthenticatedBasePrixRouteImport } from './routes/_authenticated/base-prix'
 import { Route as AuthenticatedChantiersRouteImport } from './routes/_authenticated/chantiers'
 import { Route as AuthenticatedChargesFixesRouteImport } from './routes/_authenticated/charges-fixes'
@@ -28,6 +29,7 @@ import { Route as AuthenticatedRemboursementsPeRouteImport } from './routes/_aut
 import { Route as AuthenticatedRoutineRouteImport } from './routes/_authenticated/routine'
 import { Route as AuthenticatedStatistiquesRouteImport } from './routes/_authenticated/statistiques'
 import { Route as AuthenticatedTresorerieRouteImport } from './routes/_authenticated/tresorerie'
+import { Route as AuthenticatedUrgentRouteImport } from './routes/_authenticated/urgent'
 import { Route as AuthenticatedRoutineParametresRouteImport } from './routes/_authenticated/routine.parametres'
 
 const IndexRoute = IndexRouteImport.update({
@@ -43,6 +45,11 @@ const SigninRoute = SigninRouteImport.update({
   id: '/signin',
   path: '/signin',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAchatsRoute = AuthenticatedAchatsRouteImport.update({
+  id: '/achats',
+  path: '/achats',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedBasePrixRoute = AuthenticatedBasePrixRouteImport.update({
   id: '/base-prix',
@@ -129,6 +136,11 @@ const AuthenticatedTresorerieRoute = AuthenticatedTresorerieRouteImport.update({
   path: '/tresorerie',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedUrgentRoute = AuthenticatedUrgentRouteImport.update({
+  id: '/urgent',
+  path: '/urgent',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedRoutineParametresRoute =
   AuthenticatedRoutineParametresRouteImport.update({
     id: '/parametres',
@@ -139,6 +151,7 @@ const AuthenticatedRoutineParametresRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
+  '/achats': typeof AuthenticatedAchatsRoute
   '/base-prix': typeof AuthenticatedBasePrixRoute
   '/chantiers': typeof AuthenticatedChantiersRoute
   '/charges-fixes': typeof AuthenticatedChargesFixesRoute
@@ -155,11 +168,13 @@ export interface FileRoutesByFullPath {
   '/routine': typeof AuthenticatedRoutineRouteWithChildren
   '/statistiques': typeof AuthenticatedStatistiquesRoute
   '/tresorerie': typeof AuthenticatedTresorerieRoute
+  '/urgent': typeof AuthenticatedUrgentRoute
   '/routine/parametres': typeof AuthenticatedRoutineParametresRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
+  '/achats': typeof AuthenticatedAchatsRoute
   '/base-prix': typeof AuthenticatedBasePrixRoute
   '/chantiers': typeof AuthenticatedChantiersRoute
   '/charges-fixes': typeof AuthenticatedChargesFixesRoute
@@ -176,6 +191,7 @@ export interface FileRoutesByTo {
   '/routine': typeof AuthenticatedRoutineRouteWithChildren
   '/statistiques': typeof AuthenticatedStatistiquesRoute
   '/tresorerie': typeof AuthenticatedTresorerieRoute
+  '/urgent': typeof AuthenticatedUrgentRoute
   '/routine/parametres': typeof AuthenticatedRoutineParametresRoute
 }
 export interface FileRoutesById {
@@ -183,6 +199,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/signin': typeof SigninRoute
+  '/_authenticated/achats': typeof AuthenticatedAchatsRoute
   '/_authenticated/base-prix': typeof AuthenticatedBasePrixRoute
   '/_authenticated/chantiers': typeof AuthenticatedChantiersRoute
   '/_authenticated/charges-fixes': typeof AuthenticatedChargesFixesRoute
@@ -199,6 +216,7 @@ export interface FileRoutesById {
   '/_authenticated/routine': typeof AuthenticatedRoutineRouteWithChildren
   '/_authenticated/statistiques': typeof AuthenticatedStatistiquesRoute
   '/_authenticated/tresorerie': typeof AuthenticatedTresorerieRoute
+  '/_authenticated/urgent': typeof AuthenticatedUrgentRoute
   '/_authenticated/routine/parametres': typeof AuthenticatedRoutineParametresRoute
 }
 export interface FileRouteTypes {
@@ -206,6 +224,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/signin'
+    | '/achats'
     | '/base-prix'
     | '/chantiers'
     | '/charges-fixes'
@@ -222,11 +241,13 @@ export interface FileRouteTypes {
     | '/routine'
     | '/statistiques'
     | '/tresorerie'
+    | '/urgent'
     | '/routine/parametres'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/signin'
+    | '/achats'
     | '/base-prix'
     | '/chantiers'
     | '/charges-fixes'
@@ -243,12 +264,14 @@ export interface FileRouteTypes {
     | '/routine'
     | '/statistiques'
     | '/tresorerie'
+    | '/urgent'
     | '/routine/parametres'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/signin'
+    | '/_authenticated/achats'
     | '/_authenticated/base-prix'
     | '/_authenticated/chantiers'
     | '/_authenticated/charges-fixes'
@@ -265,6 +288,7 @@ export interface FileRouteTypes {
     | '/_authenticated/routine'
     | '/_authenticated/statistiques'
     | '/_authenticated/tresorerie'
+    | '/_authenticated/urgent'
     | '/_authenticated/routine/parametres'
   fileRoutesById: FileRoutesById
 }
@@ -296,6 +320,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/signin'
       preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/achats': {
+      id: '/_authenticated/achats'
+      path: '/achats'
+      fullPath: '/achats'
+      preLoaderRoute: typeof AuthenticatedAchatsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/base-prix': {
       id: '/_authenticated/base-prix'
@@ -409,6 +440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTresorerieRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/urgent': {
+      id: '/_authenticated/urgent'
+      path: '/urgent'
+      fullPath: '/urgent'
+      preLoaderRoute: typeof AuthenticatedUrgentRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/routine/parametres': {
       id: '/_authenticated/routine/parametres'
       path: '/parametres'
@@ -431,6 +469,7 @@ const AuthenticatedRoutineRouteWithChildren =
   AuthenticatedRoutineRoute._addFileChildren(AuthenticatedRoutineRouteChildren)
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAchatsRoute: typeof AuthenticatedAchatsRoute
   AuthenticatedBasePrixRoute: typeof AuthenticatedBasePrixRoute
   AuthenticatedChantiersRoute: typeof AuthenticatedChantiersRoute
   AuthenticatedChargesFixesRoute: typeof AuthenticatedChargesFixesRoute
@@ -447,9 +486,11 @@ interface AuthenticatedRouteChildren {
   AuthenticatedRoutineRoute: typeof AuthenticatedRoutineRouteWithChildren
   AuthenticatedStatistiquesRoute: typeof AuthenticatedStatistiquesRoute
   AuthenticatedTresorerieRoute: typeof AuthenticatedTresorerieRoute
+  AuthenticatedUrgentRoute: typeof AuthenticatedUrgentRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAchatsRoute: AuthenticatedAchatsRoute,
   AuthenticatedBasePrixRoute: AuthenticatedBasePrixRoute,
   AuthenticatedChantiersRoute: AuthenticatedChantiersRoute,
   AuthenticatedChargesFixesRoute: AuthenticatedChargesFixesRoute,
@@ -466,6 +507,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedRoutineRoute: AuthenticatedRoutineRouteWithChildren,
   AuthenticatedStatistiquesRoute: AuthenticatedStatistiquesRoute,
   AuthenticatedTresorerieRoute: AuthenticatedTresorerieRoute,
+  AuthenticatedUrgentRoute: AuthenticatedUrgentRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

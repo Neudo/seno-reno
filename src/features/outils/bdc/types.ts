@@ -14,14 +14,19 @@ export type BdcLot = {
   number: string;
 };
 
-export type ParsedTolteckQuote = {
+export type ParsedTolteckQuoteSummary = {
   clientName: string;
   fileName: string;
-  lots: BdcLot[];
   projectAddress: string;
   projectTitle: string;
   quoteDate: string;
   quoteNumber: string;
+  totalHt: number | null;
+  totalTtc: number | null;
+};
+
+export type ParsedTolteckQuote = ParsedTolteckQuoteSummary & {
+  lots: BdcLot[];
 };
 
 export type BdcDetails = {
