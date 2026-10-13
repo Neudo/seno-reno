@@ -131,8 +131,8 @@ export function FinancesOverviewPage() {
     return (
       <PageCanvas title="Finances">
         <div className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger les données financières. Vérifie que la migration
-          a bien été appliquée, puis réessaie.
+          Impossible de charger les données financières. Vérifiez que la migration
+          a bien été appliquée, puis réessayez.
         </div>
       </PageCanvas>
     );
@@ -226,7 +226,7 @@ export function FinancesOverviewPage() {
             </div>
           ) : (
             <FinanceEmpty
-              detail="Ajoute un mouvement manuel ou enregistre un remboursement pour visualiser les prévisions de trésorerie."
+              detail="Ajoutez un mouvement manuel ou enregistrez un remboursement pour visualiser les prévisions de trésorerie."
               title="Aucun mouvement à projeter"
             />
           )}

@@ -274,7 +274,7 @@ export function ClientsPage() {
         (nextDraft.kind === "PERSON" && !nextDraft.lastName.trim()) ||
         (nextDraft.kind === "COMPANY" && !nextDraft.companyName.trim())
       ) {
-        throw new Error("Renseigne le nom du client.");
+        throw new Error("Renseignez le nom du client.");
       }
 
       const { id, ...input } = nextDraft;
@@ -329,7 +329,7 @@ export function ClientsPage() {
     return (
       <PageCanvas title="Clients">
         <p className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger les clients. Vérifie la migration puis réessaie.
+          Impossible de charger les clients. Vérifiez la migration puis réessayez.
         </p>
       </PageCanvas>
     );
@@ -477,7 +477,7 @@ export function ClientsPage() {
                   : "Aucun client pour le moment."}
               </p>
               <p className="mt-1 text-sm text-slate-500">
-                Ajoute le premier contact client pour démarrer.
+                Ajoutez le premier contact client pour démarrer.
               </p>
             </div>
           </div>

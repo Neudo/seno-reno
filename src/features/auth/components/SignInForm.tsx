@@ -37,7 +37,7 @@ export function SignInForm() {
       setFormError(
         error instanceof Error
           ? error.message
-          : "Connexion impossible. Réessaie.",
+          : "Connexion impossible. Réessayez.",
       );
     }
   };

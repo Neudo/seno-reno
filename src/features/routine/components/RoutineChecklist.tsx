@@ -79,7 +79,7 @@ function TaskRow({
             ? "text-gray-400 line-through"
             : task.isUrgent
               ? "font-medium text-gray-900"
-            : "text-gray-800",
+              : "text-gray-800",
         )}
         htmlFor={taskInputId}
       >
@@ -172,7 +172,7 @@ export function RoutineChecklist() {
       <main className="min-w-0 flex-1 overflow-y-auto bg-[#F4F5F7]">
         <div className="mx-auto max-w-3xl px-6 py-6">
           <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            Impossible de charger la routine. Réessaie dans un instant.
+            Impossible de charger la routine. Réessayez dans un instant.
           </div>
         </div>
       </main>
@@ -312,6 +312,18 @@ export function RoutineChecklist() {
             />
           </div>
         </section>
+
+        {sections.length === 0 ? (
+          <section className="border border-gray-200 bg-white px-5 py-6">
+            <p className="text-sm font-medium text-gray-800">
+              Aucune routine configurée.
+            </p>
+            <p className="mt-1 text-sm text-gray-500">
+              Utilisez « Personnaliser » pour ajouter vos catégories et vos
+              tâches.
+            </p>
+          </section>
+        ) : null}
 
         {sections.map((section) => {
           const completedCount = section.items.filter((item) =>

@@ -13,10 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as AuthenticatedAchatsRouteImport } from './routes/_authenticated/achats'
-import { Route as AuthenticatedBasePrixRouteImport } from './routes/_authenticated/base-prix'
 import { Route as AuthenticatedChantiersRouteImport } from './routes/_authenticated/chantiers'
 import { Route as AuthenticatedChargesFixesRouteImport } from './routes/_authenticated/charges-fixes'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
+import { Route as AuthenticatedContratSousTraitantRouteImport } from './routes/_authenticated/contrat-sous-traitant'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDevisRouteImport } from './routes/_authenticated/devis'
 import { Route as AuthenticatedFinancesRouteImport } from './routes/_authenticated/finances'
@@ -27,9 +27,12 @@ import { Route as AuthenticatedPlanningRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedProspectionRouteImport } from './routes/_authenticated/prospection'
 import { Route as AuthenticatedRemboursementsPeRouteImport } from './routes/_authenticated/remboursements-pe'
 import { Route as AuthenticatedRoutineRouteImport } from './routes/_authenticated/routine'
+import { Route as AuthenticatedSousTraitantsRouteImport } from './routes/_authenticated/sous-traitants'
 import { Route as AuthenticatedStatistiquesRouteImport } from './routes/_authenticated/statistiques'
 import { Route as AuthenticatedTresorerieRouteImport } from './routes/_authenticated/tresorerie'
 import { Route as AuthenticatedUrgentRouteImport } from './routes/_authenticated/urgent'
+import { Route as AuthenticatedChantiersIndexRouteImport } from './routes/_authenticated/chantiers.index'
+import { Route as AuthenticatedChantiersChantierIdRouteImport } from './routes/_authenticated/chantiers.$chantierId'
 import { Route as AuthenticatedRoutineParametresRouteImport } from './routes/_authenticated/routine.parametres'
 
 const IndexRoute = IndexRouteImport.update({
@@ -51,11 +54,6 @@ const AuthenticatedAchatsRoute = AuthenticatedAchatsRouteImport.update({
   path: '/achats',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedBasePrixRoute = AuthenticatedBasePrixRouteImport.update({
-  id: '/base-prix',
-  path: '/base-prix',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedChantiersRoute = AuthenticatedChantiersRouteImport.update({
   id: '/chantiers',
   path: '/chantiers',
@@ -72,6 +70,12 @@ const AuthenticatedClientsRoute = AuthenticatedClientsRouteImport.update({
   path: '/clients',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedContratSousTraitantRoute =
+  AuthenticatedContratSousTraitantRouteImport.update({
+    id: '/contrat-sous-traitant',
+    path: '/contrat-sous-traitant',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -125,6 +129,12 @@ const AuthenticatedRoutineRoute = AuthenticatedRoutineRouteImport.update({
   path: '/routine',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSousTraitantsRoute =
+  AuthenticatedSousTraitantsRouteImport.update({
+    id: '/sous-traitants',
+    path: '/sous-traitants',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedStatistiquesRoute =
   AuthenticatedStatistiquesRouteImport.update({
     id: '/statistiques',
@@ -141,6 +151,18 @@ const AuthenticatedUrgentRoute = AuthenticatedUrgentRouteImport.update({
   path: '/urgent',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedChantiersIndexRoute =
+  AuthenticatedChantiersIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedChantiersRoute,
+  } as any)
+const AuthenticatedChantiersChantierIdRoute =
+  AuthenticatedChantiersChantierIdRouteImport.update({
+    id: '/$chantierId',
+    path: '/$chantierId',
+    getParentRoute: () => AuthenticatedChantiersRoute,
+  } as any)
 const AuthenticatedRoutineParametresRoute =
   AuthenticatedRoutineParametresRouteImport.update({
     id: '/parametres',
@@ -152,10 +174,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/achats': typeof AuthenticatedAchatsRoute
-  '/base-prix': typeof AuthenticatedBasePrixRoute
-  '/chantiers': typeof AuthenticatedChantiersRoute
+  '/chantiers': typeof AuthenticatedChantiersRouteWithChildren
   '/charges-fixes': typeof AuthenticatedChargesFixesRoute
   '/clients': typeof AuthenticatedClientsRoute
+  '/contrat-sous-traitant': typeof AuthenticatedContratSousTraitantRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/devis': typeof AuthenticatedDevisRoute
   '/finances': typeof AuthenticatedFinancesRoute
@@ -166,19 +188,21 @@ export interface FileRoutesByFullPath {
   '/prospection': typeof AuthenticatedProspectionRoute
   '/remboursements-pe': typeof AuthenticatedRemboursementsPeRoute
   '/routine': typeof AuthenticatedRoutineRouteWithChildren
+  '/sous-traitants': typeof AuthenticatedSousTraitantsRoute
   '/statistiques': typeof AuthenticatedStatistiquesRoute
   '/tresorerie': typeof AuthenticatedTresorerieRoute
   '/urgent': typeof AuthenticatedUrgentRoute
+  '/chantiers/$chantierId': typeof AuthenticatedChantiersChantierIdRoute
   '/routine/parametres': typeof AuthenticatedRoutineParametresRoute
+  '/chantiers/': typeof AuthenticatedChantiersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/achats': typeof AuthenticatedAchatsRoute
-  '/base-prix': typeof AuthenticatedBasePrixRoute
-  '/chantiers': typeof AuthenticatedChantiersRoute
   '/charges-fixes': typeof AuthenticatedChargesFixesRoute
   '/clients': typeof AuthenticatedClientsRoute
+  '/contrat-sous-traitant': typeof AuthenticatedContratSousTraitantRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/devis': typeof AuthenticatedDevisRoute
   '/finances': typeof AuthenticatedFinancesRoute
@@ -189,10 +213,13 @@ export interface FileRoutesByTo {
   '/prospection': typeof AuthenticatedProspectionRoute
   '/remboursements-pe': typeof AuthenticatedRemboursementsPeRoute
   '/routine': typeof AuthenticatedRoutineRouteWithChildren
+  '/sous-traitants': typeof AuthenticatedSousTraitantsRoute
   '/statistiques': typeof AuthenticatedStatistiquesRoute
   '/tresorerie': typeof AuthenticatedTresorerieRoute
   '/urgent': typeof AuthenticatedUrgentRoute
+  '/chantiers/$chantierId': typeof AuthenticatedChantiersChantierIdRoute
   '/routine/parametres': typeof AuthenticatedRoutineParametresRoute
+  '/chantiers': typeof AuthenticatedChantiersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -200,10 +227,10 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/signin': typeof SigninRoute
   '/_authenticated/achats': typeof AuthenticatedAchatsRoute
-  '/_authenticated/base-prix': typeof AuthenticatedBasePrixRoute
-  '/_authenticated/chantiers': typeof AuthenticatedChantiersRoute
+  '/_authenticated/chantiers': typeof AuthenticatedChantiersRouteWithChildren
   '/_authenticated/charges-fixes': typeof AuthenticatedChargesFixesRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
+  '/_authenticated/contrat-sous-traitant': typeof AuthenticatedContratSousTraitantRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/devis': typeof AuthenticatedDevisRoute
   '/_authenticated/finances': typeof AuthenticatedFinancesRoute
@@ -214,10 +241,13 @@ export interface FileRoutesById {
   '/_authenticated/prospection': typeof AuthenticatedProspectionRoute
   '/_authenticated/remboursements-pe': typeof AuthenticatedRemboursementsPeRoute
   '/_authenticated/routine': typeof AuthenticatedRoutineRouteWithChildren
+  '/_authenticated/sous-traitants': typeof AuthenticatedSousTraitantsRoute
   '/_authenticated/statistiques': typeof AuthenticatedStatistiquesRoute
   '/_authenticated/tresorerie': typeof AuthenticatedTresorerieRoute
   '/_authenticated/urgent': typeof AuthenticatedUrgentRoute
+  '/_authenticated/chantiers/$chantierId': typeof AuthenticatedChantiersChantierIdRoute
   '/_authenticated/routine/parametres': typeof AuthenticatedRoutineParametresRoute
+  '/_authenticated/chantiers/': typeof AuthenticatedChantiersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -225,10 +255,10 @@ export interface FileRouteTypes {
     | '/'
     | '/signin'
     | '/achats'
-    | '/base-prix'
     | '/chantiers'
     | '/charges-fixes'
     | '/clients'
+    | '/contrat-sous-traitant'
     | '/dashboard'
     | '/devis'
     | '/finances'
@@ -239,19 +269,21 @@ export interface FileRouteTypes {
     | '/prospection'
     | '/remboursements-pe'
     | '/routine'
+    | '/sous-traitants'
     | '/statistiques'
     | '/tresorerie'
     | '/urgent'
+    | '/chantiers/$chantierId'
     | '/routine/parametres'
+    | '/chantiers/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/signin'
     | '/achats'
-    | '/base-prix'
-    | '/chantiers'
     | '/charges-fixes'
     | '/clients'
+    | '/contrat-sous-traitant'
     | '/dashboard'
     | '/devis'
     | '/finances'
@@ -262,20 +294,23 @@ export interface FileRouteTypes {
     | '/prospection'
     | '/remboursements-pe'
     | '/routine'
+    | '/sous-traitants'
     | '/statistiques'
     | '/tresorerie'
     | '/urgent'
+    | '/chantiers/$chantierId'
     | '/routine/parametres'
+    | '/chantiers'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/signin'
     | '/_authenticated/achats'
-    | '/_authenticated/base-prix'
     | '/_authenticated/chantiers'
     | '/_authenticated/charges-fixes'
     | '/_authenticated/clients'
+    | '/_authenticated/contrat-sous-traitant'
     | '/_authenticated/dashboard'
     | '/_authenticated/devis'
     | '/_authenticated/finances'
@@ -286,10 +321,13 @@ export interface FileRouteTypes {
     | '/_authenticated/prospection'
     | '/_authenticated/remboursements-pe'
     | '/_authenticated/routine'
+    | '/_authenticated/sous-traitants'
     | '/_authenticated/statistiques'
     | '/_authenticated/tresorerie'
     | '/_authenticated/urgent'
+    | '/_authenticated/chantiers/$chantierId'
     | '/_authenticated/routine/parametres'
+    | '/_authenticated/chantiers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -328,13 +366,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAchatsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/base-prix': {
-      id: '/_authenticated/base-prix'
-      path: '/base-prix'
-      fullPath: '/base-prix'
-      preLoaderRoute: typeof AuthenticatedBasePrixRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/chantiers': {
       id: '/_authenticated/chantiers'
       path: '/chantiers'
@@ -354,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/clients'
       fullPath: '/clients'
       preLoaderRoute: typeof AuthenticatedClientsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/contrat-sous-traitant': {
+      id: '/_authenticated/contrat-sous-traitant'
+      path: '/contrat-sous-traitant'
+      fullPath: '/contrat-sous-traitant'
+      preLoaderRoute: typeof AuthenticatedContratSousTraitantRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard': {
@@ -426,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRoutineRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/sous-traitants': {
+      id: '/_authenticated/sous-traitants'
+      path: '/sous-traitants'
+      fullPath: '/sous-traitants'
+      preLoaderRoute: typeof AuthenticatedSousTraitantsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/statistiques': {
       id: '/_authenticated/statistiques'
       path: '/statistiques'
@@ -447,6 +492,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUrgentRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/chantiers/': {
+      id: '/_authenticated/chantiers/'
+      path: '/'
+      fullPath: '/chantiers/'
+      preLoaderRoute: typeof AuthenticatedChantiersIndexRouteImport
+      parentRoute: typeof AuthenticatedChantiersRoute
+    }
+    '/_authenticated/chantiers/$chantierId': {
+      id: '/_authenticated/chantiers/$chantierId'
+      path: '/$chantierId'
+      fullPath: '/chantiers/$chantierId'
+      preLoaderRoute: typeof AuthenticatedChantiersChantierIdRouteImport
+      parentRoute: typeof AuthenticatedChantiersRoute
+    }
     '/_authenticated/routine/parametres': {
       id: '/_authenticated/routine/parametres'
       path: '/parametres'
@@ -456,6 +515,23 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedChantiersRouteChildren {
+  AuthenticatedChantiersChantierIdRoute: typeof AuthenticatedChantiersChantierIdRoute
+  AuthenticatedChantiersIndexRoute: typeof AuthenticatedChantiersIndexRoute
+}
+
+const AuthenticatedChantiersRouteChildren: AuthenticatedChantiersRouteChildren =
+  {
+    AuthenticatedChantiersChantierIdRoute:
+      AuthenticatedChantiersChantierIdRoute,
+    AuthenticatedChantiersIndexRoute: AuthenticatedChantiersIndexRoute,
+  }
+
+const AuthenticatedChantiersRouteWithChildren =
+  AuthenticatedChantiersRoute._addFileChildren(
+    AuthenticatedChantiersRouteChildren,
+  )
 
 interface AuthenticatedRoutineRouteChildren {
   AuthenticatedRoutineParametresRoute: typeof AuthenticatedRoutineParametresRoute
@@ -470,10 +546,10 @@ const AuthenticatedRoutineRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAchatsRoute: typeof AuthenticatedAchatsRoute
-  AuthenticatedBasePrixRoute: typeof AuthenticatedBasePrixRoute
-  AuthenticatedChantiersRoute: typeof AuthenticatedChantiersRoute
+  AuthenticatedChantiersRoute: typeof AuthenticatedChantiersRouteWithChildren
   AuthenticatedChargesFixesRoute: typeof AuthenticatedChargesFixesRoute
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
+  AuthenticatedContratSousTraitantRoute: typeof AuthenticatedContratSousTraitantRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDevisRoute: typeof AuthenticatedDevisRoute
   AuthenticatedFinancesRoute: typeof AuthenticatedFinancesRoute
@@ -484,6 +560,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProspectionRoute: typeof AuthenticatedProspectionRoute
   AuthenticatedRemboursementsPeRoute: typeof AuthenticatedRemboursementsPeRoute
   AuthenticatedRoutineRoute: typeof AuthenticatedRoutineRouteWithChildren
+  AuthenticatedSousTraitantsRoute: typeof AuthenticatedSousTraitantsRoute
   AuthenticatedStatistiquesRoute: typeof AuthenticatedStatistiquesRoute
   AuthenticatedTresorerieRoute: typeof AuthenticatedTresorerieRoute
   AuthenticatedUrgentRoute: typeof AuthenticatedUrgentRoute
@@ -491,10 +568,10 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAchatsRoute: AuthenticatedAchatsRoute,
-  AuthenticatedBasePrixRoute: AuthenticatedBasePrixRoute,
-  AuthenticatedChantiersRoute: AuthenticatedChantiersRoute,
+  AuthenticatedChantiersRoute: AuthenticatedChantiersRouteWithChildren,
   AuthenticatedChargesFixesRoute: AuthenticatedChargesFixesRoute,
   AuthenticatedClientsRoute: AuthenticatedClientsRoute,
+  AuthenticatedContratSousTraitantRoute: AuthenticatedContratSousTraitantRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDevisRoute: AuthenticatedDevisRoute,
   AuthenticatedFinancesRoute: AuthenticatedFinancesRoute,
@@ -505,6 +582,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProspectionRoute: AuthenticatedProspectionRoute,
   AuthenticatedRemboursementsPeRoute: AuthenticatedRemboursementsPeRoute,
   AuthenticatedRoutineRoute: AuthenticatedRoutineRouteWithChildren,
+  AuthenticatedSousTraitantsRoute: AuthenticatedSousTraitantsRoute,
   AuthenticatedStatistiquesRoute: AuthenticatedStatistiquesRoute,
   AuthenticatedTresorerieRoute: AuthenticatedTresorerieRoute,
   AuthenticatedUrgentRoute: AuthenticatedUrgentRoute,

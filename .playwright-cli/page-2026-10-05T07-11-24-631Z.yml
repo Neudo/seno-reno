@@ -1,0 +1,11 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - button "Copy element"
+          - button "Collapse toolbar" [expanded]

@@ -1,7 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-import { ChantiersPage } from "@/features/chantiers/pages/ChantiersPage";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/chantiers")({
-  component: ChantiersPage,
+  component: ChantiersRouteLayout,
 });
+
+function ChantiersRouteLayout() {
+  return <Outlet />;
+}

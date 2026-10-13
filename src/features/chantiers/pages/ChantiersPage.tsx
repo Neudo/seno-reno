@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { Plus, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -14,6 +15,7 @@ import {
   type ChantierStatus,
   type SignedQuoteCandidate,
 } from "@/features/chantiers/api/chantiers-api";
+import type { SubcontractorRecord } from "@/features/sous-traitants/api/subcontractors-api";
 import {
   FieldLabel,
   inputClassName,
@@ -56,21 +58,6 @@ const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   year: "numeric",
 });
 
-function createDraft(chantier?: ChantierRecord): ChantierDraft {
-  return {
-    actualEndDate: chantier?.actualEndDate ?? null,
-    address: chantier?.address ?? "",
-    clientId: chantier?.clientId ?? "",
-    id: chantier?.id,
-    initialSignedQuoteAmount: chantier?.initialSignedQuoteAmount ?? null,
-    name: chantier?.name ?? "",
-    notes: chantier?.notes ?? "",
-    plannedEndDate: chantier?.plannedEndDate ?? null,
-    plannedStartDate: chantier?.plannedStartDate ?? null,
-    status: chantier?.status ?? "PENDING",
-  };
-}
-
 function formatCurrency(value: number | null) {
   return value === null ? "—" : currencyFormatter.format(value);
 }
@@ -92,11 +79,11 @@ function toInput(draft: ChantierDraft, amount: string): ChantierInput {
   const initialSignedQuoteAmount = parseAmount(amount);
 
   if (!draft.clientId) {
-    throw new Error("Sélectionne le client du chantier.");
+    throw new Error("Sélectionnez le client du chantier.");
   }
 
   if (!draft.name.trim()) {
-    throw new Error("Renseigne le nom du chantier.");
+    throw new Error("Renseignez le nom du chantier.");
   }
 
   if (amount.trim() && initialSignedQuoteAmount === null) {
@@ -181,14 +168,21 @@ function ChantierForm({
   onUpdate,
   revenue,
   setRevenue,
+  subcontractors,
 }: {
   clients: ChantierClient[];
   draft: ChantierDraft;
   onUpdate: (patch: Partial<ChantierDraft>) => void;
   revenue: string;
   setRevenue: (value: string) => void;
+  subcontractors: SubcontractorRecord[];
 }) {
   const availableClients = clients.filter((client) => !client.isArchived);
+  const availableSubcontractors = subcontractors.filter(
+    (subcontractor) =>
+      !subcontractor.isArchived ||
+      draft.subcontractorIds.includes(subcontractor.id),
+  );
 
   return (
     <div className="grid gap-5">
@@ -220,7 +214,7 @@ function ChantierForm({
         </FieldLabel>
         {availableClients.length === 0 ? (
           <p className="border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-5 text-amber-900">
-            Crée d’abord un client : chaque chantier lui est obligatoirement
+            Créez d’abord un client : chaque chantier lui est obligatoirement
             rattaché.
           </p>
         ) : null}
@@ -270,6 +264,60 @@ function ChantierForm({
 
       <section className="grid gap-3 border-t border-slate-200 pt-5">
         <p className="text-xs font-semibold tracking-[0.13em] text-slate-500 uppercase">
+          Sous-traitants
+        </p>
+        {availableSubcontractors.length ? (
+          <div className="grid gap-2">
+            {availableSubcontractors.map((subcontractor) => {
+              const isSelected = draft.subcontractorIds.includes(
+                subcontractor.id,
+              );
+
+              return (
+                <label
+                  className="flex cursor-pointer items-start gap-3 border border-slate-200 px-3 py-3 text-sm text-slate-700 hover:bg-slate-50"
+                  key={subcontractor.id}
+                >
+                  <input
+                    checked={isSelected}
+                    className="mt-0.5 size-4 shrink-0 accent-seno-700"
+                    onChange={(event) =>
+                      onUpdate({
+                        subcontractorIds: event.target.checked
+                          ? [...draft.subcontractorIds, subcontractor.id]
+                          : draft.subcontractorIds.filter(
+                              (id) => id !== subcontractor.id,
+                            ),
+                      })
+                    }
+                    type="checkbox"
+                  />
+                  <span>
+                    <span className="block font-medium text-slate-900">
+                      {subcontractor.name}
+                    </span>
+                    {subcontractor.contactName || subcontractor.city ? (
+                      <span className="mt-0.5 block text-xs text-slate-500">
+                        {[subcontractor.contactName, subcontractor.city]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                    ) : null}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="border border-slate-200 bg-slate-50 px-3 py-2 text-sm leading-5 text-slate-600">
+            Aucun sous-traitant disponible. Ajoutez-le depuis la page
+            Sous-traitants.
+          </p>
+        )}
+      </section>
+
+      <section className="grid gap-3 border-t border-slate-200 pt-5">
+        <p className="text-xs font-semibold tracking-[0.13em] text-slate-500 uppercase">
           Planning
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -295,16 +343,6 @@ function ChantierForm({
             />
           </FieldLabel>
         </div>
-        <FieldLabel label="Fin réelle">
-          <input
-            className={inputClassName}
-            onChange={(event) =>
-              onUpdate({ actualEndDate: event.target.value || null })
-            }
-            type="date"
-            value={draft.actualEndDate ?? ""}
-          />
-        </FieldLabel>
       </section>
 
       <section className="grid gap-3 border-t border-slate-200 pt-5">
@@ -394,7 +432,7 @@ function QuoteCreation({
         </>
       ) : (
         <div className="border border-slate-200 bg-slate-50 px-4 py-5 text-sm leading-6 text-slate-600">
-          Aucun devis signé et rattaché à un client n’est disponible. Tu peux
+          Aucun devis signé et rattaché à un client n’est disponible. Vous pouvez
           créer le chantier manuellement.
         </div>
       )}
@@ -415,6 +453,7 @@ function ChantierDrawer({
   onSave,
   onUpdate,
   setCreationMode,
+  subcontractors,
 }: {
   candidates: SignedQuoteCandidate[];
   clients: ChantierClient[];
@@ -428,6 +467,7 @@ function ChantierDrawer({
   onSave: (amount: string) => void;
   onUpdate: (patch: Partial<ChantierDraft>) => void;
   setCreationMode: (mode: CreationMode) => void;
+  subcontractors: SubcontractorRecord[];
 }) {
   const [revenue, setRevenue] = useState(
     draft.initialSignedQuoteAmount === null
@@ -490,6 +530,7 @@ function ChantierDrawer({
               onUpdate={onUpdate}
               revenue={revenue}
               setRevenue={setRevenue}
+              subcontractors={subcontractors}
             />
             {saveError ? (
               <p
@@ -527,6 +568,7 @@ function ChantierDrawer({
 
 export function ChantiersPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<ChantierDraft | null>(null);
   const [search, setSearch] = useState("");
@@ -608,8 +650,8 @@ export function ChantiersPage() {
     return (
       <PageCanvas title="Chantiers">
         <p className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger les chantiers. Vérifie que la migration a bien
-          été appliquée, puis réessaie.
+          Impossible de charger les chantiers. Vérifiez que la migration a bien
+          été appliquée, puis réessayez.
         </p>
       </PageCanvas>
     );
@@ -622,6 +664,12 @@ export function ChantiersPage() {
         .length,
     }),
     {} as Record<ChantierStatus, number>,
+  );
+  const subcontractorNames = new Map(
+    snapshotQuery.data.subcontractors.map((subcontractor) => [
+      subcontractor.id,
+      subcontractor.name,
+    ]),
   );
 
   return (
@@ -659,12 +707,12 @@ export function ChantiersPage() {
             </select>
             <button
               className="flex h-10 cursor-pointer items-center justify-center gap-2 bg-seno-700 px-4 text-sm font-medium text-white transition-colors hover:bg-seno-800"
-              onClick={() => {
-                saveMutation.reset();
-                createFromQuoteMutation.reset();
-                setCreationMode("MANUAL");
-                setDraft(createDraft());
-              }}
+              onClick={() =>
+                void navigate({
+                  params: { chantierId: "nouveau" },
+                  to: "/chantiers/$chantierId",
+                })
+              }
               type="button"
             >
               <Plus aria-hidden="true" className="size-4" />
@@ -674,13 +722,14 @@ export function ChantiersPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1060px] text-left">
+          <table className="w-full min-w-[1160px] text-left">
             <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold tracking-[0.1em] text-slate-500 uppercase">
               <tr>
                 <th className="px-4 py-3">Chantier</th>
                 <th className="px-4 py-3">Client</th>
                 <th className="px-4 py-3">Statut</th>
                 <th className="px-4 py-3">Adresse</th>
+                <th className="px-4 py-3">Sous-traitants</th>
                 <th className="px-4 py-3 text-right">CA prévi.</th>
                 <th className="px-4 py-3">Début</th>
                 <th className="px-4 py-3">Fin prévue</th>
@@ -691,12 +740,23 @@ export function ChantiersPage() {
                 <tr
                   className="cursor-pointer transition-colors hover:bg-slate-50"
                   key={chantier.id}
-                  onClick={() => {
-                    saveMutation.reset();
-                    createFromQuoteMutation.reset();
-                    setCreationMode("MANUAL");
-                    setDraft(createDraft(chantier));
+                  onClick={() =>
+                    void navigate({
+                      params: { chantierId: chantier.id },
+                      to: "/chantiers/$chantierId",
+                    })
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      void navigate({
+                        params: { chantierId: chantier.id },
+                        to: "/chantiers/$chantierId",
+                      });
+                    }
                   }}
+                  role="link"
+                  tabIndex={0}
                 >
                   <td className="max-w-100 px-4 py-3">
                     <p className="truncate text-sm font-medium text-slate-900">
@@ -713,6 +773,16 @@ export function ChantiersPage() {
                   <td className="max-w-75 px-4 py-3 text-sm text-slate-600">
                     <p className="truncate">{chantier.address || "—"}</p>
                   </td>
+                  <td className="max-w-60 px-4 py-3 text-sm text-slate-600">
+                    <p className="truncate">
+                      {chantier.subcontractorIds.length
+                        ? chantier.subcontractorIds
+                            .map((id) => subcontractorNames.get(id))
+                            .filter(Boolean)
+                            .join(", ")
+                        : "—"}
+                    </p>
+                  </td>
                   <td className="px-4 py-3 text-right text-sm font-medium text-slate-800">
                     {formatCurrency(chantier.initialSignedQuoteAmount)}
                   </td>
@@ -726,7 +796,7 @@ export function ChantiersPage() {
               ))}
               {visibleChantiers.length === 0 ? (
                 <tr>
-                  <td className="px-5 py-14 text-center" colSpan={7}>
+                  <td className="px-5 py-14 text-center" colSpan={8}>
                     <p className="text-sm font-medium text-slate-800">
                       {chantiers.length
                         ? "Aucun chantier ne correspond aux filtres"
@@ -735,7 +805,7 @@ export function ChantiersPage() {
                     <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-500">
                       {chantiers.length
                         ? "Ajuste la recherche ou le statut pour afficher d’autres chantiers."
-                        : "Crée un chantier manuellement ou à partir d’un devis signé."}
+                        : "Importez le PDF d’un devis pour créer un chantier."}
                     </p>
                   </td>
                 </tr>
@@ -783,6 +853,7 @@ export function ChantiersPage() {
             createFromQuoteMutation.reset();
             setCreationMode(mode);
           }}
+          subcontractors={snapshotQuery.data.subcontractors}
         />
       ) : null}
     </PageCanvas>

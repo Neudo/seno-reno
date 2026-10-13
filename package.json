@@ -11,7 +11,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "supabase:start": "supabase start --ignore-health-check",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:status": "supabase status"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
@@ -55,6 +59,7 @@
     "prettier": "3.9.6",
     "prettier-plugin-tailwindcss": "0.8.1",
     "react-grab": "^0.2.0",
+    "supabase": "2.117.0",
     "tailwindcss": "4.3.3",
     "typescript": "~7.0.2",
     "vite": "^8.2.2",

@@ -270,16 +270,16 @@ export function TresoreriePage() {
   const saveMutation = useMutation({
     mutationFn: async (nextDraft: MovementDraft) => {
       if (!user) {
-        throw new Error("Connecte-toi pour enregistrer un mouvement.");
+        throw new Error("Connectez-vous pour enregistrer un mouvement.");
       }
 
       const amount = parseAmount(nextDraft.amount);
       if (!nextDraft.label.trim() || !amount || !nextDraft.expectedDate) {
-        throw new Error("Renseigne le libellé, le montant et la date prévue.");
+        throw new Error("Renseignez le libellé, le montant et la date prévue.");
       }
 
       if (nextDraft.status === "COMPLETED" && !nextDraft.actualDate) {
-        throw new Error("Renseigne la date réelle du mouvement terminé.");
+        throw new Error("Renseignez la date réelle du mouvement terminé.");
       }
 
       const payload = {
@@ -356,8 +356,8 @@ export function TresoreriePage() {
     return (
       <PageCanvas title="Trésorerie">
         <div className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger la trésorerie. Vérifie que la migration a bien été
-          appliquée, puis réessaie.
+          Impossible de charger la trésorerie. Vérifiez que la migration a bien été
+          appliquée, puis réessayez.
         </div>
       </PageCanvas>
     );
@@ -563,7 +563,7 @@ export function TresoreriePage() {
                       detail={
                         search || statusFilter !== "ALL"
                           ? "Aucun mouvement ne correspond aux filtres du mois."
-                          : "Ajoute un mouvement exceptionnel pour démarrer le suivi de trésorerie."
+                          : "Ajoutez un mouvement exceptionnel pour démarrer le suivi de trésorerie."
                       }
                       title="Aucun mouvement ce mois-ci"
                     />

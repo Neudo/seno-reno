@@ -308,7 +308,7 @@ export function ChargesFixesPage() {
   const saveMutation = useMutation({
     mutationFn: async (nextDraft: FixedCostDraft) => {
       if (!user) {
-        throw new Error("Connecte-toi pour enregistrer une charge.");
+        throw new Error("Connectez-vous pour enregistrer une charge.");
       }
 
       const amount = parseAmount(nextDraft.amount);
@@ -318,14 +318,14 @@ export function ChargesFixesPage() {
       const resolvedDueDate = nextDraft.dueMode === "DATE" ? nextDraft.dueDate : null;
 
       if (!nextDraft.name.trim() || !amount || !nextDraft.startDate) {
-        throw new Error("Renseigne le nom, le montant et la date de début.");
+        throw new Error("Renseignez le nom, le montant et la date de début.");
       }
 
       if (
         (nextDraft.dueMode === "DAY" && (!Number.isInteger(dueDay) || dueDay < 1 || dueDay > 31)) ||
         (nextDraft.dueMode === "DATE" && !nextDraft.dueDate)
       ) {
-        throw new Error("Renseigne une échéance valide.");
+        throw new Error("Renseignez une échéance valide.");
       }
 
       if (
@@ -398,8 +398,8 @@ export function ChargesFixesPage() {
     return (
       <PageCanvas title="Charges fixes">
         <div className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger les charges fixes. Vérifie que la migration a bien
-          été appliquée, puis réessaie.
+          Impossible de charger les charges fixes. Vérifiez que la migration a bien
+          été appliquée, puis réessayez.
         </div>
       </PageCanvas>
     );
@@ -553,7 +553,7 @@ export function ChargesFixesPage() {
                 <tr>
                   <td className="p-0" colSpan={8}>
                     <FinanceEmpty
-                      detail="Ajoute tes coûts récurrents pour anticiper les échéances et mesurer leur poids mensuel."
+                      detail="Ajoutez vos coûts récurrents pour anticiper les échéances et mesurer leur poids mensuel."
                       title="Aucune charge fixe"
                     />
                   </td>

@@ -129,7 +129,7 @@ function toQuoteInput(draft: QuoteDraft): QuoteInput {
   const totalTtc = parseAmount(draft.totalTtc);
 
   if (!draft.quoteNumber.trim() || !draft.clientName.trim()) {
-    throw new Error("Renseigne le numéro de devis et le client.");
+    throw new Error("Renseignez le numéro de devis et le client.");
   }
 
   if (
@@ -540,11 +540,11 @@ function QuoteEditorDrawer({
             {draft.chantierId ? (
               "Le chantier créé depuis ce devis est bien rattaché."
             ) : !draft.clientId ? (
-              "Associe un client au devis avant de créer le chantier."
+              "Associez un client au devis avant de créer le chantier."
             ) : (
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <span>
-                  Le devis est signé. Crée le chantier avec ces informations.
+                  Le devis est signé. Créez le chantier avec ces informations.
                 </span>
                 <button
                   className="h-8 cursor-pointer border border-emerald-300 bg-white px-3 text-xs font-medium text-emerald-800 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
@@ -616,7 +616,7 @@ function ImportQuoteDrawer({
       nextFile.type === "application/pdf" ||
       nextFile.name.toLocaleLowerCase().endsWith(".pdf");
     if (!isPdf || nextFile.size > 20 * 1024 * 1024) {
-      setParseError("Choisis un PDF Tolteck de 20 Mo maximum.");
+      setParseError("Choisissez un PDF Tolteck de 20 Mo maximum.");
       return;
     }
 
@@ -781,7 +781,7 @@ export function DevisPage() {
   const importMutation = useMutation({
     mutationFn: async ({ file, draft }: { file: File; draft: QuoteDraft }) => {
       if (!user) {
-        throw new Error("Connecte-toi pour importer un devis.");
+        throw new Error("Connectez-vous pour importer un devis.");
       }
 
       await importQuotePdf({
@@ -828,8 +828,8 @@ export function DevisPage() {
     return (
       <PageCanvas title="Devis">
         <div className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger les devis. Vérifie que la migration a bien été
-          appliquée, puis réessaie.
+          Impossible de charger les devis. Vérifiez que la migration a bien été
+          appliquée, puis réessayez.
         </div>
       </PageCanvas>
     );
@@ -849,7 +849,7 @@ export function DevisPage() {
     <PageCanvas title="Devis">
       <div className="mt-2 flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
         <p className="max-w-3xl text-sm leading-6 text-slate-500">
-          Suivi commercial des devis créés dans Tolteck. Importe le PDF pour
+          Suivi commercial des devis créés dans Tolteck. Importez le PDF pour
           centraliser les informations utiles, sans modifier le document formel.
         </p>
         <button
@@ -1054,7 +1054,7 @@ export function DevisPage() {
                     </p>
                     <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-500">
                       {quoteRows.length === 0
-                        ? "Importe le PDF Tolteck pour commencer le suivi commercial."
+                        ? "Importez le PDF Tolteck pour commencer le suivi commercial."
                         : "Ajuste la recherche ou les filtres pour afficher d’autres devis."}
                     </p>
                   </td>

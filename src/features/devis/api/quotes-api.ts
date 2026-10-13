@@ -227,6 +227,8 @@ export async function importQuotePdf({
     await client.storage.from(quoteDocumentsBucket).remove([path]);
     throwIfError(insertResult.error);
   }
+
+  return quoteId;
 }
 
 export async function updateQuote({

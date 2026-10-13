@@ -292,12 +292,12 @@ export function RemboursementsPePage() {
   const saveMutation = useMutation({
     mutationFn: async (nextDraft: PersonalExpenseDraft) => {
       if (!user) {
-        throw new Error("Connecte-toi pour enregistrer une dépense.");
+        throw new Error("Connectez-vous pour enregistrer une dépense.");
       }
 
       const amount = parseAmount(nextDraft.amount);
       if (!nextDraft.label.trim() || !amount || !nextDraft.expenseDate) {
-        throw new Error("Renseigne le libellé, le montant et la date de dépense.");
+        throw new Error("Renseignez le libellé, le montant et la date de dépense.");
       }
 
       if (
@@ -375,8 +375,8 @@ export function RemboursementsPePage() {
     return (
       <PageCanvas title="Remboursements PE">
         <div className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger les remboursements. Vérifie que la migration a bien
-          été appliquée, puis réessaie.
+          Impossible de charger les remboursements. Vérifiez que la migration a bien
+          été appliquée, puis réessayez.
         </div>
       </PageCanvas>
     );
@@ -579,7 +579,7 @@ export function RemboursementsPePage() {
                       detail={
                         search || typeFilter !== "ALL" || statusFilter !== "ALL"
                           ? "Aucune dépense ne correspond aux filtres."
-                          : "Ajoute une dépense avancée personnellement pour suivre son remboursement."
+                          : "Ajoutez une dépense avancée personnellement pour suivre son remboursement."
                       }
                       title="Aucune dépense personnelle"
                     />

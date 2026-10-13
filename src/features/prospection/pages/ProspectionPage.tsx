@@ -700,7 +700,7 @@ function EmptyState({
         {icon}
         <p className="mt-3 font-medium text-slate-700">{message}</p>
         <p className="mt-1 text-sm text-slate-500">
-          Ajoute une première entrée pour commencer le suivi.
+          Ajoutez une première entrée pour commencer le suivi.
         </p>
       </div>
     </div>
@@ -745,7 +745,7 @@ export function ProspectionPage() {
         (draft.kind === "PERSON" && !draft.lastName.trim()) ||
         (draft.kind === "COMPANY" && !draft.companyName.trim())
       )
-        throw new Error("Renseigne le nom du prospect.");
+        throw new Error("Renseignez le nom du prospect.");
       const {
         id,
         interactionNote,
@@ -774,7 +774,7 @@ export function ProspectionPage() {
     mutationFn: async (draft: EventDraft) => {
       if (!user) throw new Error("Utilisateur non disponible.");
       if (!draft.name.trim())
-        throw new Error("Renseigne le nom de l’événement ou du lieu.");
+        throw new Error("Renseignez le nom de l’événement ou du lieu.");
       const { id, ...input } = draft;
       await saveProspectingEvent(input, user.id, id);
     },
@@ -786,7 +786,7 @@ export function ProspectionPage() {
   const communicationMutation = useMutation({
     mutationFn: async (draft: CommunicationDraft) => {
       if (!user) throw new Error("Utilisateur non disponible.");
-      if (!draft.name.trim()) throw new Error("Renseigne le nom de l’action.");
+      if (!draft.name.trim()) throw new Error("Renseignez le nom de l’action.");
       const { id, ...input } = draft;
       await saveProspectingCommunication(input, user.id, id);
     },
@@ -799,7 +799,7 @@ export function ProspectionPage() {
     mutationFn: async (draft: IdeaDraft) => {
       if (!user) throw new Error("Utilisateur non disponible.");
       if (!draft.name.trim())
-        throw new Error("Renseigne le nom de l’idée ou du contact.");
+        throw new Error("Renseignez le nom de l’idée ou du contact.");
       const { id, ...input } = draft;
       await saveProspectIdea(input, user.id, id);
     },
@@ -896,8 +896,8 @@ export function ProspectionPage() {
     return (
       <PageCanvas title="Prospection">
         <p className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger la prospection. Vérifie la migration puis
-          réessaie.
+          Impossible de charger la prospection. Vérifiez la migration puis
+          réessayez.
         </p>
       </PageCanvas>
     );

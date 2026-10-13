@@ -393,7 +393,7 @@ export async function parseTolteckQuote(
 
   if (lots.length === 0 || lots.every((lot) => lot.lines.length === 0)) {
     throw new Error(
-      "Aucune ligne exploitable n’a été détectée. Vérifie qu’il s’agit bien d’un devis Tolteck contenant du texte.",
+      "Aucune ligne exploitable n’a été détectée. Vérifiez qu’il s’agit bien d’un devis Tolteck contenant du texte.",
     );
   }
 

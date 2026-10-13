@@ -800,7 +800,7 @@ export function BdcGenerator() {
             </div>
             {!canGenerate ? (
               <p className="mt-3 text-xs leading-5 text-slate-500">
-                Renseigne la société, un montant HT positif et conserve au moins
+                Renseignez la société, un montant HT positif et conservez au moins
                 une ligne pour poursuivre.
               </p>
             ) : null}
@@ -817,7 +817,7 @@ export function BdcGenerator() {
                 Prévisualisation & génération
               </h2>
               <p className="mt-1 text-sm text-slate-500">
-                Vérifie la mise en page finale avant de télécharger le bon de
+                Vérifiez la mise en page finale avant de télécharger le bon de
                 commande.
               </p>
             </div>

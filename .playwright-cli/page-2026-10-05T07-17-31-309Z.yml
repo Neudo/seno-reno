@@ -1,0 +1,18 @@
+- generic:
+  - generic:
+    - main:
+      - generic:
+        - img "SENO Rénovation"
+        - generic:
+          - generic:
+            - generic:
+              - generic: Adresse e-mail
+              - textbox "Adresse e-mail":
+                - /placeholder: nom@entreprise.fr
+            - generic:
+              - generic: Mot de passe
+              - textbox "Mot de passe"
+            - button "Se connecter"
+  - generic [ref=f1e18]:
+    - button "Stop selecting element" [pressed] [ref=f1e32] [cursor=pointer]
+    - button "Collapse toolbar" [expanded] [ref=f1e27] [cursor=pointer]

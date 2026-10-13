@@ -23,13 +23,14 @@ export type AppPath =
   | "/statistiques"
   | "/devis"
   | "/chantiers"
+  | "/sous-traitants"
   | "/planning"
   | "/finances"
   | "/tresorerie"
   | "/charges-fixes"
   | "/marges"
   | "/remboursements-pe"
-  | "/base-prix"
+  | "/contrat-sous-traitant"
   | "/generation-bdc"
   | "/parametres";
 
@@ -65,6 +66,7 @@ export const primaryNavigation: NavigationItem[] = [
   },
   { icon: FileText, label: "Devis", path: "/devis" },
   { icon: HardHat, label: "Chantiers", path: "/chantiers" },
+  { icon: UsersRound, label: "Sous-traitants", path: "/sous-traitants" },
   { icon: CalendarDays, label: "Planning", path: "/planning" },
   {
     children: [
@@ -79,7 +81,7 @@ export const primaryNavigation: NavigationItem[] = [
   },
   {
     children: [
-      { label: "Base de prix", path: "/base-prix" },
+      { label: "Contrat sous-traitant", path: "/contrat-sous-traitant" },
       { label: "Génération BDC", path: "/generation-bdc" },
     ],
     icon: Wrench,

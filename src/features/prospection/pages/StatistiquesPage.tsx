@@ -211,8 +211,8 @@ export function StatistiquesPage() {
     return (
       <PageCanvas title="Statistiques">
         <p className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger les statistiques. Vérifie la migration puis
-          réessaie.
+          Impossible de charger les statistiques. Vérifiez la migration puis
+          réessayez.
         </p>
       </PageCanvas>
     );
