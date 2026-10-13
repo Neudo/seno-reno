@@ -58,6 +58,7 @@ import {
   textareaClassName,
 } from "@/features/clients-prospects/components/client-prospecting-ui";
 import { useAuth } from "@/features/auth/context/AuthProvider";
+import { DataListPage } from "@/shared/components/app-shell/DataListPage";
 import { PageCanvas } from "@/shared/components/app-shell/PageCanvas";
 import { cn } from "@/shared/lib/utils";
 
@@ -934,31 +935,34 @@ export function ProspectionPage() {
   };
 
   return (
-    <PageCanvas title="Prospection">
-      <div className="mt-2 border-b border-slate-200">
-        <div className="flex overflow-x-auto">
-          {tabs.map((entry) => (
-            <button
-              className={cn(
-                "shrink-0 cursor-pointer border-b-2 px-4 py-3 text-sm font-medium",
-                tab === entry.id
-                  ? "border-seno-700 text-seno-700"
-                  : "border-transparent text-slate-500 hover:text-slate-800",
-              )}
-              key={entry.id}
-              onClick={() => {
-                setTab(entry.id);
-                setSearch("");
-              }}
-              type="button"
-            >
-              {entry.label}
-            </button>
-          ))}
+    <DataListPage
+      title="Prospection"
+      toolbar={
+        <div className="-my-4 pt-3">
+          <div className="flex overflow-x-auto">
+            {tabs.map((entry) => (
+              <button
+                className={cn(
+                  "shrink-0 cursor-pointer border-b-2 px-4 py-2.5 text-sm font-medium",
+                  tab === entry.id
+                    ? "border-seno-700 text-seno-700"
+                    : "border-transparent text-gray-500 hover:text-gray-800",
+                )}
+                key={entry.id}
+                onClick={() => {
+                  setTab(entry.id);
+                  setSearch("");
+                }}
+                type="button"
+              >
+                {entry.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-
-      <section className="mt-5 border border-slate-200 bg-white">
+      }
+    >
+      <section className="border border-gray-200 bg-white">
         <div className="flex flex-col gap-3 border-b border-slate-200 p-4 lg:flex-row lg:items-center lg:justify-between">
           <label className="relative block w-full lg:max-w-md">
             <Search
@@ -1450,6 +1454,6 @@ export function ProspectionPage() {
           <IdeaForm draft={ideaDraft} onChange={setIdeaDraft} />
         </Drawer>
       ) : null}
-    </PageCanvas>
+    </DataListPage>
   );
 }

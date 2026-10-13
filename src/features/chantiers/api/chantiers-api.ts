@@ -194,7 +194,9 @@ export type ChantierProcurement = {
   orderedAt: string | null;
   paymentStatus: PaymentStatus | null;
   plannedDeliveryDate: string | null;
+  purchasedAt?: string | null;
   quantity: number | null;
+  quantityLabel?: string;
   supplier: string;
   title: string;
   updatedAt: string;
@@ -202,7 +204,7 @@ export type ChantierProcurement = {
 
 export type CreateChantierProcurementInput = Omit<
   ChantierProcurement,
-  "chantierId" | "createdAt" | "id" | "updatedAt"
+  "chantierId" | "createdAt" | "id" | "updatedAt" | "purchasedAt"
 >;
 
 type ChantierRow = {
@@ -292,7 +294,9 @@ type ChantierProcurementRow = {
   ordered_at: string | null;
   payment_status: PaymentStatus | null;
   planned_delivery_date: string | null;
+  purchased_at?: string | null;
   quantity: number | string | null;
+  quantity_label?: string;
   supplier: string;
   title: string;
   updated_at: string;
@@ -408,7 +412,9 @@ function toProcurement(row: ChantierProcurementRow): ChantierProcurement {
     orderedAt: row.ordered_at,
     paymentStatus: row.payment_status,
     plannedDeliveryDate: row.planned_delivery_date,
+    purchasedAt: row.purchased_at ?? null,
     quantity: toNumber(row.quantity),
+    quantityLabel: row.quantity_label ?? "",
     supplier: row.supplier,
     title: row.title,
     updatedAt: row.updated_at,
@@ -621,7 +627,7 @@ export async function getChantierDetail(
     client
       .from("chantier_procurements")
       .select(
-        "id, chantier_id, kind, title, quantity, forecast_amount, supplier, order_status, payment_status, ordered_at, planned_delivery_date, description, add_to_shopping_list, created_at, updated_at",
+        "id, chantier_id, kind, title, quantity, quantity_label, forecast_amount, supplier, order_status, payment_status, ordered_at, planned_delivery_date, purchased_at, description, add_to_shopping_list, created_at, updated_at",
       )
       .eq("chantier_id", chantierId)
       .order("created_at", { ascending: false }),
@@ -750,21 +756,24 @@ export async function createChantierProcurement({
   input: CreateChantierProcurementInput;
   userId: string;
 }) {
-  const result = await getClient().from("chantier_procurements").insert({
-    add_to_shopping_list: input.addToShoppingList,
-    chantier_id: chantierId,
-    description: input.description.trim(),
-    forecast_amount: input.forecastAmount,
-    kind: input.kind,
-    order_status: input.orderStatus,
-    ordered_at: input.orderedAt,
-    payment_status: input.paymentStatus,
-    planned_delivery_date: input.plannedDeliveryDate,
-    quantity: input.quantity,
-    supplier: input.supplier.trim(),
-    title: input.title.trim(),
-    user_id: userId,
-  });
+  const result = await getClient()
+    .from("chantier_procurements")
+    .insert({
+      add_to_shopping_list: input.addToShoppingList,
+      chantier_id: chantierId,
+      description: input.description.trim(),
+      forecast_amount: input.forecastAmount,
+      kind: input.kind,
+      order_status: input.orderStatus,
+      ordered_at: input.orderedAt,
+      payment_status: input.paymentStatus,
+      planned_delivery_date: input.plannedDeliveryDate,
+      quantity: input.quantity,
+      quantity_label: input.quantityLabel?.trim() ?? "",
+      supplier: input.supplier.trim(),
+      title: input.title.trim(),
+      user_id: userId,
+    });
 
   throwIfError(result.error);
 }

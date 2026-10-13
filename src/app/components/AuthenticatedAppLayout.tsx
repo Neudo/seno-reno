@@ -10,12 +10,12 @@ export function AuthenticatedAppLayout() {
   const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
 
   return (
-    <div className="flex h-svh overflow-hidden">
+    <div className="flex h-svh overflow-hidden bg-background">
       <AppSidebar
         isMobileOpen={isMobileNavigationOpen}
         onMobileClose={() => setIsMobileNavigationOpen(false)}
       />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <AppHeader
           isMobileNavigationOpen={isMobileNavigationOpen}
           onMobileNavigationOpen={() => setIsMobileNavigationOpen(true)}

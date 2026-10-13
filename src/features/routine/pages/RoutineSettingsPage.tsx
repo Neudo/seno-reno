@@ -6,6 +6,7 @@ import {
   ChevronUp,
   Pencil,
   Plus,
+  RotateCcw,
   Square,
   Trash2,
 } from "lucide-react";
@@ -18,6 +19,7 @@ import {
   deleteRoutineCategory,
   deleteRoutineItem,
   getRoutineSnapshot,
+  resetRoutine,
   updateRoutineCategory,
   updateRoutineCategoryOrder,
   updateRoutineItemOrder,
@@ -226,6 +228,10 @@ export function RoutineSettingsPage() {
     mutationFn: updateRoutineItemOrder,
     onSuccess: invalidateRoutine,
   });
+  const resetRoutineMutation = useMutation({
+    mutationFn: resetRoutine,
+    onSuccess: invalidateRoutine,
+  });
 
   if (routineQuery.isPending) {
     return <RoutineSettingsLoading />;
@@ -331,6 +337,25 @@ export function RoutineSettingsPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
+              className="flex cursor-pointer items-center gap-1.5 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={resetRoutineMutation.isPending}
+              onClick={() => {
+                if (
+                  window.confirm(
+                    "Restaurer le modèle de base ? Vos personnalisations de la routine seront supprimées.",
+                  )
+                ) {
+                  void resetRoutineMutation.mutateAsync(
+                    sections.map((section) => section.id),
+                  );
+                }
+              }}
+              type="button"
+            >
+              <RotateCcw aria-hidden="true" className="size-3" />
+              Réinitialiser
+            </button>
+            <button
               className="cursor-pointer bg-[#00365A] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#004A7A]"
               onClick={() => void navigate({ to: "/routine" })}
               type="button"
@@ -342,8 +367,8 @@ export function RoutineSettingsPage() {
 
         {sections.length === 0 ? (
           <section className="border border-gray-200 bg-white px-5 py-6 text-sm text-gray-600">
-            Aucune catégorie configurée. Ajoutez votre première catégorie
-            ci-dessous, puis vos tâches.
+            Aucune catégorie configurée. Restaurez le modèle de base ou ajoutez
+            vos catégories.
           </section>
         ) : null}
 

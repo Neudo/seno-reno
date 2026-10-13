@@ -30,6 +30,7 @@ import {
 } from "@/features/clients-prospects/components/client-prospecting-ui";
 import { useAuth } from "@/features/auth/context/AuthProvider";
 import { getChantierSnapshot } from "@/features/chantiers/api/chantiers-api";
+import { DataListPage } from "@/shared/components/app-shell/DataListPage";
 import { PageCanvas } from "@/shared/components/app-shell/PageCanvas";
 import { cn } from "@/shared/lib/utils";
 
@@ -329,74 +330,91 @@ export function ClientsPage() {
     return (
       <PageCanvas title="Clients">
         <p className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger les clients. Vérifiez la migration puis réessayez.
+          Impossible de charger les clients. Vérifiez la migration puis
+          réessayez.
         </p>
       </PageCanvas>
     );
   }
 
   return (
-    <PageCanvas title="Clients">
-      <div className="mt-2 flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm leading-6 text-slate-500">
-            Contacts clients, coordonnées et origine de la relation.
-          </p>
-          <p className="mt-1 text-xs text-slate-400">
-            Les chantiers rattachés sont comptabilisés dans la liste.
-          </p>
-        </div>
-        <button
-          className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 bg-seno-700 px-4 text-sm font-medium text-white transition-colors hover:bg-seno-800"
-          onClick={() => {
-            saveMutation.reset();
-            setDraft(createClientDraft());
-          }}
-          type="button"
-        >
-          <Plus aria-hidden="true" className="size-4" />
-          Ajouter un client
-        </button>
-      </div>
-
-      <section className="mt-5 border border-slate-200 bg-white">
-        <div className="flex flex-col gap-3 border-b border-slate-200 p-4 lg:flex-row lg:items-center lg:justify-between">
-          <label className="relative block w-full lg:max-w-md">
-            <Search
-              aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              aria-label="Rechercher un client"
-              className="h-10 w-full border border-slate-300 bg-white py-2 pr-3 pl-9 text-sm outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Rechercher un client…"
-              value={search}
-            />
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {clientFilters.map((entry) => (
-              <button
-                className={cn(
-                  "cursor-pointer border px-3 py-2 text-xs font-medium transition-colors",
-                  filter === entry.id
-                    ? "border-seno-700 bg-seno-700 text-white"
-                    : "border-slate-300 text-slate-600 hover:border-slate-400 hover:bg-slate-50",
-                )}
-                key={entry.id}
-                onClick={() => setFilter(entry.id)}
-                type="button"
-              >
-                {entry.label}
-              </button>
-            ))}
+    <DataListPage
+      title="Clients"
+      toolbar={
+        <>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="relative min-w-[150px] flex-1 sm:max-w-[280px]">
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                aria-label="Rechercher un client"
+                className="w-full border border-gray-200 bg-gray-50 py-1.5 pr-3 pl-9 text-sm transition-colors outline-none focus:border-seno-700 focus:bg-white"
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Rechercher un client…"
+                value={search}
+              />
+            </label>
+            <button
+              className="ml-auto flex shrink-0 cursor-pointer items-center gap-2 bg-seno-700 px-4 py-1.5 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-seno-800"
+              onClick={() => {
+                saveMutation.reset();
+                setDraft(createClientDraft());
+              }}
+              type="button"
+            >
+              <Plus aria-hidden="true" className="size-3.5" />
+              Ajouter un client
+            </button>
           </div>
-        </div>
-
+          <div className="flex flex-wrap items-center gap-1">
+            {clientFilters.map((entry) => {
+              const count = (clients ?? []).filter((client) =>
+                entry.id === "ARCHIVED"
+                  ? client.isArchived
+                  : !client.isArchived &&
+                    (entry.id === "ALL" ||
+                      (entry.id === "CURRENT_SITE"
+                        ? currentChantierClientIds.has(client.id)
+                        : !chantiersByClient.has(client.id))),
+              ).length;
+              return (
+                <button
+                  aria-pressed={filter === entry.id}
+                  className={cn(
+                    "flex cursor-pointer items-center gap-1.5 px-3 py-1 text-xs font-medium transition-colors",
+                    filter === entry.id
+                      ? "bg-seno-700 text-white"
+                      : "bg-gray-100 text-gray-500 hover:bg-gray-200",
+                  )}
+                  key={entry.id}
+                  onClick={() => setFilter(entry.id)}
+                  type="button"
+                >
+                  {entry.label}
+                  <span
+                    className={cn(
+                      "px-1.5 py-0.5 text-xs font-semibold",
+                      filter === entry.id
+                        ? "bg-white/20 text-white"
+                        : "bg-white text-gray-500",
+                    )}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      }
+    >
+      <section className="overflow-x-auto border border-gray-200 bg-white">
         {visibleClients.length ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[820px] text-left">
-              <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold tracking-[0.1em] text-slate-500 uppercase">
+              <thead className="border-b border-gray-200 bg-gray-50 text-xs font-semibold tracking-widest text-gray-400 uppercase">
                 <tr>
                   <th className="px-4 py-3">Client</th>
                   <th className="px-4 py-3">Contact</th>
@@ -405,17 +423,17 @@ export function ClientsPage() {
                   <th className="w-10 px-3 py-3" aria-label="Actions" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-gray-100">
                 {visibleClients.map((client) => (
                   <tr
-                    className="cursor-pointer transition-colors hover:bg-slate-50"
+                    className="cursor-pointer transition-colors hover:bg-gray-50"
                     key={client.id}
                     onClick={() => {
                       saveMutation.reset();
                       setDraft(createClientDraft(client));
                     }}
                   >
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <span className="grid size-8 place-items-center bg-seno-50 text-seno-700">
                           {client.kind === "COMPANY" ? (
@@ -425,10 +443,10 @@ export function ClientsPage() {
                           )}
                         </span>
                         <div>
-                          <p className="font-medium text-slate-900">
+                          <p className="font-medium text-gray-900">
                             {getClientName(client)}
                           </p>
-                          <p className="mt-0.5 text-xs text-slate-500">
+                          <p className="mt-0.5 text-xs text-gray-500">
                             {sourceLabels[client.sourceKind]}
                             {client.sourceDetail
                               ? ` · ${client.sourceDetail}`
@@ -437,19 +455,19 @@ export function ClientsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-3">
                       <ContactDetails
                         email={client.email}
                         phone={client.phone}
                       />
                     </td>
-                    <td className="px-4 py-4 text-sm text-slate-600">
+                    <td className="px-4 py-3 text-sm text-gray-600">
                       {getLocation(client.city, client.postalCode)}
                     </td>
-                    <td className="px-4 py-4 text-sm text-slate-500">
+                    <td className="px-4 py-3 text-sm text-gray-500">
                       {chantiersByClient.get(client.id) ?? 0}
                     </td>
-                    <td className="px-3 py-4 text-slate-400">
+                    <td className="px-3 py-4 text-gray-400">
                       {client.isArchived ? (
                         <Archive
                           aria-label="Client archivé"
@@ -469,14 +487,14 @@ export function ClientsPage() {
             <div>
               <UserRound
                 aria-hidden="true"
-                className="mx-auto size-7 text-slate-300"
+                className="mx-auto size-7 text-gray-300"
               />
-              <p className="mt-3 font-medium text-slate-700">
+              <p className="mt-3 font-medium text-gray-700">
                 {search
                   ? "Aucun client ne correspond à cette recherche."
                   : "Aucun client pour le moment."}
               </p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-gray-500">
                 Ajoutez le premier contact client pour démarrer.
               </p>
             </div>
@@ -495,6 +513,6 @@ export function ClientsPage() {
           <ClientForm draft={draft} onChange={setDraft} />
         </Drawer>
       ) : null}
-    </PageCanvas>
+    </DataListPage>
   );
 }

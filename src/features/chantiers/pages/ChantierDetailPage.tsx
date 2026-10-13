@@ -17,6 +17,7 @@ import { Dialog } from "radix-ui";
 import { lazy, Suspense, useRef, useState } from "react";
 
 import { useAuth } from "@/features/auth/context/AuthProvider";
+import { serializePurchaseQuantity } from "@/features/achats/lib/shopping-list";
 import {
   createChantierProcurement,
   chantierDocumentCategories,
@@ -771,7 +772,11 @@ function ProcurementStatus({
   if (procurement.kind === "PURCHASE") {
     return (
       <span className="inline-flex border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-medium text-slate-600 whitespace-nowrap">
-        {procurement.addToShoppingList ? "Liste de courses" : "Achat"}
+        {procurement.purchasedAt
+          ? "Acheté"
+          : procurement.addToShoppingList
+            ? "Liste de courses"
+            : "Achat"}
       </span>
     );
   }
@@ -860,12 +865,9 @@ function ProcurementDialog({
         plannedDeliveryDate: isOrder
           ? nextDraft.plannedDeliveryDate || null
           : null,
-        quantity: isOrder
-          ? null
-          : parseAmount(nextDraft.quantity, {
-              label: "La quantité",
-              required: false,
-            }),
+        ...(isOrder
+          ? { quantity: null, quantityLabel: "" }
+          : serializePurchaseQuantity(nextDraft.quantity)),
         supplier: nextDraft.supplier,
         title: nextDraft.title,
       });
@@ -887,21 +889,26 @@ function ProcurementDialog({
     >
       <button
         aria-label="Fermer"
-        className="absolute inset-0 cursor-default bg-slate-950/35"
+        className="absolute inset-0 cursor-default bg-black/30"
         onClick={onClose}
         type="button"
       />
-      <div className="relative max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto border border-slate-200 bg-white shadow-2xl">
-        <header className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
+      <div
+        className={cn(
+          "relative max-h-[calc(100dvh-2rem)] w-full overflow-y-auto bg-white shadow-xl",
+          isOrder ? "max-w-[520px]" : "max-w-[420px]",
+        )}
+      >
+        <header className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4">
           <h2
-            className="text-lg font-semibold tracking-[-0.02em] text-slate-900"
+            className="text-sm font-semibold text-gray-800"
             id="procurement-dialog-title"
           >
             {title}
           </h2>
           <button
             aria-label="Fermer"
-            className="grid size-9 cursor-pointer place-items-center border border-slate-300 text-slate-500 transition-colors hover:bg-slate-50"
+            className="cursor-pointer text-gray-400 hover:text-gray-600"
             onClick={onClose}
             type="button"
           >
@@ -910,53 +917,58 @@ function ProcurementDialog({
         </header>
 
         <form
-          className="grid gap-4 p-5"
+          className="grid gap-3 px-6 py-4"
           onSubmit={(event) => void submit(event)}
         >
-          <label className="grid gap-1.5">
-            <span className="text-sm font-medium text-slate-700">
+          <label className="grid gap-1">
+            <span className="text-xs font-medium text-gray-500">
               {isOrder ? "Titre *" : "Article *"}
             </span>
             <input
               autoFocus
-              className="h-10 border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
+              className="border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-seno-700"
               onChange={(event) => update("title", event.target.value)}
               value={nextDraft.title}
             />
           </label>
 
-          {isOrder ? null : (
-            <label className="grid gap-1.5">
-              <span className="text-sm font-medium text-slate-700">
-                Quantité
+          <div className={isOrder ? "grid" : "grid grid-cols-2 gap-3"}>
+            {isOrder ? null : (
+              <label className="grid gap-1">
+                <span className="text-xs font-medium text-gray-500">
+                  Quantité
+                </span>
+                <input
+                  className="border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-seno-700"
+                  maxLength={120}
+                  placeholder="Ex. : 3 sacs"
+                  onChange={(event) => update("quantity", event.target.value)}
+                  value={nextDraft.quantity}
+                />
+              </label>
+            )}
+
+            <label className="grid gap-1">
+              <span className="text-xs font-medium text-gray-500">
+                {isOrder ? "Montant prévisionnel *" : "Montant estimé (€)"}
               </span>
               <input
-                className="h-10 border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
+                className="border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-seno-700"
                 inputMode="decimal"
-                onChange={(event) => update("quantity", event.target.value)}
-                value={nextDraft.quantity}
+                onChange={(event) =>
+                  update("forecastAmount", event.target.value)
+                }
+                value={nextDraft.forecastAmount}
               />
             </label>
-          )}
+          </div>
 
-          <label className="grid gap-1.5">
-            <span className="text-sm font-medium text-slate-700">
-              {isOrder ? "Montant prévisionnel *" : "Montant estimé (€)"}
-            </span>
-            <input
-              className="h-10 border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-              inputMode="decimal"
-              onChange={(event) => update("forecastAmount", event.target.value)}
-              value={nextDraft.forecastAmount}
-            />
-          </label>
-
-          <label className="grid gap-1.5">
-            <span className="text-sm font-medium text-slate-700">
+          <label className="grid gap-1">
+            <span className="text-xs font-medium text-gray-500">
               Fournisseur
             </span>
             <input
-              className="h-10 border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
+              className="border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-seno-700"
               onChange={(event) => update("supplier", event.target.value)}
               value={nextDraft.supplier}
             />
@@ -965,8 +977,8 @@ function ProcurementDialog({
           {isOrder ? (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="grid gap-1.5">
-                  <span className="text-sm font-medium text-slate-700">
+                <label className="grid gap-1">
+                  <span className="text-xs font-medium text-gray-500">
                     Statut commande
                   </span>
                   <select
@@ -983,8 +995,8 @@ function ProcurementDialog({
                     ))}
                   </select>
                 </label>
-                <label className="grid gap-1.5">
-                  <span className="text-sm font-medium text-slate-700">
+                <label className="grid gap-1">
+                  <span className="text-xs font-medium text-gray-500">
                     Statut paiement
                   </span>
                   <select
@@ -1006,12 +1018,12 @@ function ProcurementDialog({
                 </label>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="grid gap-1.5">
-                  <span className="text-sm font-medium text-slate-700">
+                <label className="grid gap-1">
+                  <span className="text-xs font-medium text-gray-500">
                     Date commande
                   </span>
                   <input
-                    className="h-10 border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
+                    className="border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-seno-700"
                     onChange={(event) =>
                       update("orderedAt", event.target.value)
                     }
@@ -1019,12 +1031,12 @@ function ProcurementDialog({
                     value={nextDraft.orderedAt}
                   />
                 </label>
-                <label className="grid gap-1.5">
-                  <span className="text-sm font-medium text-slate-700">
+                <label className="grid gap-1">
+                  <span className="text-xs font-medium text-gray-500">
                     Livraison prévue
                   </span>
                   <input
-                    className="h-10 border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
+                    className="border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-seno-700"
                     onChange={(event) =>
                       update("plannedDeliveryDate", event.target.value)
                     }
@@ -1033,8 +1045,8 @@ function ProcurementDialog({
                   />
                 </label>
               </div>
-              <label className="grid gap-1.5">
-                <span className="text-sm font-medium text-slate-700">
+              <label className="grid gap-1">
+                <span className="text-xs font-medium text-gray-500">
                   Description
                 </span>
                 <textarea
@@ -1062,16 +1074,16 @@ function ProcurementDialog({
 
           {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
-          <footer className="mt-1 flex justify-end gap-2 border-t border-slate-200 pt-4">
+          <footer className="mt-1 flex justify-end gap-2 border-t border-gray-100 pt-4">
             <button
-              className="h-10 cursor-pointer border border-slate-300 px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              className="h-10 cursor-pointer border border-slate-300 px-4 text-xs font-medium text-gray-500 transition-colors hover:bg-slate-50"
               onClick={onClose}
               type="button"
             >
               Annuler
             </button>
             <button
-              className="h-10 cursor-pointer bg-seno-700 px-4 text-sm font-medium text-white transition-colors hover:bg-seno-800 disabled:cursor-wait disabled:opacity-60"
+              className="cursor-pointer bg-seno-700 px-4 py-1.5 text-sm font-medium text-white hover:bg-seno-800 disabled:cursor-wait disabled:opacity-60"
               disabled={isSaving}
               type="submit"
             >
@@ -1113,6 +1125,9 @@ function Purchases({ detail }: { detail: ChantierDetail }) {
       setDraft(null);
       await queryClient.invalidateQueries({
         queryKey: ["chantier", user?.id, detail.chantier.id],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["shopping-list", user?.id],
       });
     },
   });
@@ -1170,10 +1185,12 @@ function Purchases({ detail }: { detail: ChantierDetail }) {
                     <p className="truncate text-sm font-medium text-slate-900">
                       {procurement.title}
                     </p>
-                    {procurement.quantity !== null ? (
+                    {procurement.quantityLabel ||
+                    procurement.quantity !== null ? (
                       <p className="mt-1 text-xs text-slate-500">
                         Quantité :{" "}
-                        {procurement.quantity.toLocaleString("fr-FR")}
+                        {procurement.quantityLabel ||
+                          procurement.quantity?.toLocaleString("fr-FR")}
                       </p>
                     ) : null}
                   </td>
@@ -2594,18 +2611,18 @@ function DetailContent({ detail }: { detail: ChantierDetail }) {
   const { chantier } = detail;
 
   return (
-    <main className="min-w-0 flex-1 overflow-auto bg-[#f7f8f9]">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-5 pt-5 sm:px-7">
+    <main className="min-w-0 flex-1 overflow-auto bg-background">
+      <header className="border-b border-gray-200 bg-white">
+        <div className="px-4 pt-4 sm:px-6">
           <Link
-            className="inline-flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-seno-700"
+            className="inline-flex items-center gap-1.5 text-xs text-gray-400 transition-colors hover:text-seno-700"
             to="/chantiers"
           >
             <ArrowLeft aria-hidden="true" className="size-4" />
             Retour aux chantiers
           </Link>
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <h1 className="text-xl font-semibold tracking-[-0.03em] text-slate-900 sm:text-2xl">
+            <h1 className="text-lg font-semibold text-gray-900">
               {chantier.name}
             </h1>
             <StatusBadge status={chantier.status} />
@@ -2616,16 +2633,16 @@ function DetailContent({ detail }: { detail: ChantierDetail }) {
           </p>
           <nav
             aria-label="Navigation de la fiche chantier"
-            className="mt-5 -mx-5 overflow-x-auto sm:-mx-7"
+            className="mt-4 -mx-4 overflow-x-auto sm:-mx-6"
           >
-            <div className="flex min-w-max px-5 sm:px-7">
+            <div className="flex min-w-max px-4 sm:px-6">
               {tabs.map((tab) => (
                 <button
                   className={cn(
-                    "border-b-2 px-3 py-3 text-sm whitespace-nowrap transition-colors first:pl-0",
+                    "cursor-pointer border-b-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors",
                     activeTab === tab.id
-                      ? "border-seno-700 font-medium text-slate-900"
-                      : "cursor-pointer border-transparent text-slate-500 hover:text-slate-900",
+                      ? "border-seno-700 text-seno-700"
+                      : "border-transparent text-gray-500 hover:text-gray-700",
                   )}
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
@@ -2639,7 +2656,7 @@ function DetailContent({ detail }: { detail: ChantierDetail }) {
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-5 py-6 sm:px-7">
+      <div className="px-4 py-6 sm:px-6">
         {activeTab === "OVERVIEW" ? <Overview detail={detail} /> : null}
         {activeTab === "PURCHASES" ? <Purchases detail={detail} /> : null}
         {activeTab === "SUBCONTRACTORS" ? (

@@ -21,6 +21,7 @@ import {
   inputClassName,
   textareaClassName,
 } from "@/features/clients-prospects/components/client-prospecting-ui";
+import { DataListPage } from "@/shared/components/app-shell/DataListPage";
 import { PageCanvas } from "@/shared/components/app-shell/PageCanvas";
 import { cn } from "@/shared/lib/utils";
 
@@ -432,8 +433,8 @@ function QuoteCreation({
         </>
       ) : (
         <div className="border border-slate-200 bg-slate-50 px-4 py-5 text-sm leading-6 text-slate-600">
-          Aucun devis signé et rattaché à un client n’est disponible. Vous pouvez
-          créer le chantier manuellement.
+          Aucun devis signé et rattaché à un client n’est disponible. Vous
+          pouvez créer le chantier manuellement.
         </div>
       )}
     </div>
@@ -673,57 +674,58 @@ export function ChantiersPage() {
   );
 
   return (
-    <PageCanvas title="Chantiers">
-      <section className="mt-6 border border-slate-200 bg-white">
-        <div className="flex flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <label className="relative block w-full sm:max-w-[280px]">
+    <DataListPage
+      title="Chantiers"
+      toolbar={
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="relative min-w-[150px] flex-1 sm:max-w-[280px]">
             <Search
               aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute top-1/2 left-3 size-3.5 -trangray-y-1/2 text-gray-400"
             />
             <input
               aria-label="Rechercher un chantier"
-              className="h-10 w-full border border-slate-300 bg-white py-2 pr-3 pl-9 text-sm outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
+              className="w-full border border-gray-200 bg-gray-50 py-1.5 pr-3 pl-9 text-sm transition-colors outline-none focus:border-seno-700 focus:bg-white"
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Rechercher un chantier…"
               value={search}
             />
           </label>
-          <div className="flex flex-wrap gap-2">
-            <select
-              aria-label="Filtrer par statut"
-              className="h-10 cursor-pointer border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-              onChange={(event) =>
-                setStatusFilter(event.target.value as "ALL" | ChantierStatus)
-              }
-              value={statusFilter}
-            >
-              <option value="ALL">Tous les statuts ({chantiers.length})</option>
-              {chantierStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {statusLabels[status]} ({statusCounts[status]})
-                </option>
-              ))}
-            </select>
-            <button
-              className="flex h-10 cursor-pointer items-center justify-center gap-2 bg-seno-700 px-4 text-sm font-medium text-white transition-colors hover:bg-seno-800"
-              onClick={() =>
-                void navigate({
-                  params: { chantierId: "nouveau" },
-                  to: "/chantiers/$chantierId",
-                })
-              }
-              type="button"
-            >
-              <Plus aria-hidden="true" className="size-4" />
-              Nouveau chantier
-            </button>
-          </div>
+          <select
+            aria-label="Filtrer par statut"
+            className="min-w-[150px] cursor-pointer border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600"
+            onChange={(event) =>
+              setStatusFilter(event.target.value as "ALL" | ChantierStatus)
+            }
+            value={statusFilter}
+          >
+            <option value="ALL">Tous les statuts ({chantiers.length})</option>
+            {chantierStatuses.map((status) => (
+              <option key={status} value={status}>
+                {statusLabels[status]} ({statusCounts[status]})
+              </option>
+            ))}
+          </select>
+          <button
+            className="ml-auto flex cursor-pointer items-center justify-center gap-2 bg-seno-700 px-4 py-1.5 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-seno-800"
+            onClick={() =>
+              void navigate({
+                params: { chantierId: "nouveau" },
+                to: "/chantiers/$chantierId",
+              })
+            }
+            type="button"
+          >
+            <Plus aria-hidden="true" className="size-3.5" />
+            Nouveau chantier
+          </button>
         </div>
-
+      }
+    >
+      <section className="overflow-x-auto border border-gray-200 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1160px] text-left">
-            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold tracking-[0.1em] text-slate-500 uppercase">
+            <thead className="border-b border-gray-200 bg-gray-50 text-xs font-semibold tracking-widest text-gray-400 uppercase">
               <tr>
                 <th className="px-4 py-3">Chantier</th>
                 <th className="px-4 py-3">Client</th>
@@ -735,10 +737,10 @@ export function ChantiersPage() {
                 <th className="px-4 py-3">Fin prévue</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-gray-100">
               {visibleChantiers.map((chantier) => (
                 <tr
-                  className="cursor-pointer transition-colors hover:bg-slate-50"
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
                   key={chantier.id}
                   onClick={() =>
                     void navigate({
@@ -759,21 +761,21 @@ export function ChantiersPage() {
                   tabIndex={0}
                 >
                   <td className="max-w-100 px-4 py-3">
-                    <p className="truncate text-sm font-medium text-slate-900">
+                    <p className="truncate text-sm font-medium text-gray-900">
                       {chantier.name}
                     </p>
-                    <p className="mt-1 text-xs text-slate-400">Marge : —</p>
+                    <p className="mt-1 text-xs text-gray-400">Marge : —</p>
                   </td>
-                  <td className="max-w-52 px-4 py-3 text-sm text-slate-700">
+                  <td className="max-w-52 px-4 py-3 text-sm text-gray-700">
                     <p className="truncate">{chantier.clientName}</p>
                   </td>
                   <td className="px-4 py-3">
                     <ChantierStatusBadge status={chantier.status} />
                   </td>
-                  <td className="max-w-75 px-4 py-3 text-sm text-slate-600">
+                  <td className="max-w-75 px-4 py-3 text-sm text-gray-600">
                     <p className="truncate">{chantier.address || "—"}</p>
                   </td>
-                  <td className="max-w-60 px-4 py-3 text-sm text-slate-600">
+                  <td className="max-w-60 px-4 py-3 text-sm text-gray-600">
                     <p className="truncate">
                       {chantier.subcontractorIds.length
                         ? chantier.subcontractorIds
@@ -783,13 +785,13 @@ export function ChantiersPage() {
                         : "—"}
                     </p>
                   </td>
-                  <td className="px-4 py-3 text-right text-sm font-medium text-slate-800">
+                  <td className="px-4 py-3 text-right text-sm font-medium text-gray-800">
                     {formatCurrency(chantier.initialSignedQuoteAmount)}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
+                  <td className="px-4 py-3 text-sm text-gray-600">
                     {formatDate(chantier.plannedStartDate)}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
+                  <td className="px-4 py-3 text-sm text-gray-600">
                     {formatDate(chantier.plannedEndDate)}
                   </td>
                 </tr>
@@ -797,12 +799,12 @@ export function ChantiersPage() {
               {visibleChantiers.length === 0 ? (
                 <tr>
                   <td className="px-5 py-14 text-center" colSpan={8}>
-                    <p className="text-sm font-medium text-slate-800">
+                    <p className="text-sm font-medium text-gray-800">
                       {chantiers.length
                         ? "Aucun chantier ne correspond aux filtres"
                         : "Aucun chantier pour le moment"}
                     </p>
-                    <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-500">
+                    <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-gray-500">
                       {chantiers.length
                         ? "Ajuste la recherche ou le statut pour afficher d’autres chantiers."
                         : "Importez le PDF d’un devis pour créer un chantier."}
@@ -813,7 +815,7 @@ export function ChantiersPage() {
             </tbody>
           </table>
         </div>
-        <footer className="border-t border-slate-200 px-4 py-3 text-xs text-slate-500">
+        <footer className="border-t border-gray-200 px-4 py-3 text-xs text-gray-500">
           <span>
             {visibleChantiers.length} chantier
             {visibleChantiers.length > 1 ? "s" : ""} affiché
@@ -856,6 +858,6 @@ export function ChantiersPage() {
           subcontractors={snapshotQuery.data.subcontractors}
         />
       ) : null}
-    </PageCanvas>
+    </DataListPage>
   );
 }

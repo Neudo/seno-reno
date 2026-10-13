@@ -1,6 +1,12 @@
 import { useRouterState } from "@tanstack/react-router";
 import { Bell, ChevronDown, Menu } from "lucide-react";
 
+import { useAuth } from "@/features/auth/context/AuthProvider";
+import {
+  getAccountPresentation,
+  getPageHeader,
+} from "@/shared/config/page-header";
+
 export function AppHeader({
   isMobileNavigationOpen,
   onMobileNavigationOpen,
@@ -13,8 +19,9 @@ export function AppHeader({
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
-  const isRoutineSettings = pathname === "/routine/parametres";
-  const isRoutine = pathname.startsWith("/routine");
+  const { user } = useAuth();
+  const account = getAccountPresentation(user);
+  const { title, subtitle } = getPageHeader(pathname, account.firstName);
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6">
@@ -30,29 +37,22 @@ export function AppHeader({
         </button>
         <div className="min-w-0">
           <h1 className="truncate text-base leading-tight font-semibold text-gray-900">
-          {isRoutineSettings
-            ? "Personnalisation de la routine"
-            : isRoutine
-              ? "Routine du jour"
-              : "Bonjour Pierre-Emmanuel"}
-        </h1>
-        <p className="mt-0.5 truncate text-xs text-gray-500">
-          {isRoutineSettings
-            ? "Paramètres › Routine quotidienne"
-            : isRoutine
-              ? "Checklist quotidienne"
-              : "Voici les éléments à surveiller aujourd'hui."}
-        </p>
+            {title}
+          </h1>
+          {subtitle ? (
+            <p className="mt-0.5 truncate text-xs text-gray-500">{subtitle}</p>
+          ) : null}
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <button
-          aria-label="Notifications"
-          className="relative cursor-pointer p-2 transition-colors hover:bg-gray-100"
+          aria-label="Notifications indisponibles"
+          className="relative p-2"
+          disabled
+          title="Les notifications ne sont pas encore disponibles."
           type="button"
         >
           <Bell aria-hidden="true" className="size-4 text-gray-500" />
-          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-red-500" />
         </button>
         <button
           aria-label="Se déconnecter"
@@ -62,10 +62,13 @@ export function AppHeader({
           type="button"
         >
           <span className="flex size-6 items-center justify-center bg-[#00365A] text-xs font-semibold text-white">
-            PE
+            {account.initials}
           </span>
-          <span className="hidden text-sm text-gray-700 md:block">
-            P.-E. Martin
+          <span
+            className="hidden max-w-48 truncate text-sm text-gray-700 md:block"
+            title={account.displayName}
+          >
+            {account.displayName}
           </span>
           <ChevronDown aria-hidden="true" className="size-3 text-gray-400" />
         </button>

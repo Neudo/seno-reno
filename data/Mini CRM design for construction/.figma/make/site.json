@@ -1,0 +1,14 @@
+{
+  "title": "App Seno Reno",
+  "description": "Manage and visualize client data with clear, modern bar and graph displays tailored for building professionals to streamline project tracking.",
+  "robots": {
+    "index": false
+  },
+  "icons": {
+    "icon": "/.figma/make/favicon.png"
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

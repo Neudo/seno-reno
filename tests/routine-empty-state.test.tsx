@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   createCategory: vi.fn(),
   toggle: vi.fn(),
   navigate: vi.fn(),
+  reset: vi.fn(),
 }));
 vi.mock("@/features/auth/context/AuthProvider", () => ({
   useAuth: () => ({ user: { id: "owner" } }),
@@ -31,6 +32,7 @@ vi.mock("@/features/routine/api/routine-api", () => ({
   createRoutineItem: vi.fn(),
   deleteRoutineItem: vi.fn(),
   resetRoutineDay: vi.fn(),
+  resetRoutine: mocks.reset,
   deleteRoutineCategory: vi.fn(),
   updateRoutineCategory: vi.fn(),
   updateRoutineCategoryOrder: vi.fn(),
@@ -48,8 +50,12 @@ beforeEach(() => {
   mocks.snapshot.mockResolvedValue(emptySnapshot);
   mocks.createCategory.mockResolvedValue(undefined);
   mocks.toggle.mockResolvedValue(undefined);
+  mocks.reset.mockResolvedValue(undefined);
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 function mount(component: "checklist" | "settings", snapshot = emptySnapshot) {
   const cache = new QueryClient({
@@ -79,9 +85,9 @@ describe("routine without default placeholders", () => {
     expect(mocks.navigate).toHaveBeenCalledWith({ to: "/routine/parametres" });
   });
 
-  it("has no restore-defaults action and allows creating a first real category", async () => {
+  it("keeps restoring the base model available and allows custom categories", async () => {
     mount("settings");
-    expect(screen.queryByRole("button", { name: "Réinitialiser" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Réinitialiser" })).toBeTruthy();
     expect(screen.getByText(/Aucune catégorie configurée/u)).toBeTruthy();
     fireEvent.click(
       screen.getByRole("button", { name: "Ajouter une catégorie" }),
@@ -98,6 +104,17 @@ describe("routine without default placeholders", () => {
       userId: "owner",
       position: 0,
     });
+  });
+
+  it("requires confirmation before restoring the base model", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    mount("settings");
+    fireEvent.click(screen.getByRole("button", { name: "Réinitialiser" }));
+    expect(mocks.reset).not.toHaveBeenCalled();
+    confirm.mockReturnValue(true);
+    fireEvent.click(screen.getByRole("button", { name: "Réinitialiser" }));
+    await waitFor(() => expect(mocks.reset).toHaveBeenCalled());
+    expect(mocks.reset.mock.calls[0][0]).toEqual([]);
   });
 
   it("continues displaying and completing actual stored tasks via their label", async () => {

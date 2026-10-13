@@ -2,12 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createRoutineItem,
   getRoutineSnapshot,
+  resetRoutine,
 } from "@/features/routine/api/routine-api";
 
 const mocks = vi.hoisted(() => ({
   from: vi.fn(),
   rpc: vi.fn(),
   insert: vi.fn(),
+  remove: vi.fn(),
 }));
 vi.mock("@/features/auth/api/supabase-client", () => ({ supabase: mocks }));
 
@@ -23,33 +25,62 @@ beforeEach(() => {
     routine_item_completions: { data: [], error: null },
   };
   mocks.insert.mockResolvedValue({ error: null });
+  mocks.remove.mockResolvedValue({ error: null });
+  mocks.rpc.mockImplementation(async () => {
+    if (rows.routine_categories.data.length === 0) {
+      rows.routine_categories.data = [
+        { id: "base", name: "AGENDA", color: "#00365A", position: 0 },
+      ];
+      rows.routine_items.data = [
+        {
+          id: "base-task",
+          category_id: "base",
+          title: "Rendez-vous du jour",
+          position: 0,
+          source_key: "agenda:1",
+          is_permanent: true,
+          source_tag: null,
+          is_urgent: false,
+        },
+      ];
+    }
+    return { error: null };
+  });
   mocks.from.mockImplementation((table) => ({
     select: () => ({
       order: async () => rows[table],
       eq: async () => rows[table],
     }),
     insert: mocks.insert,
+    delete: () => ({ in: mocks.remove }),
   }));
 });
 
-describe("routine reads real data only", () => {
-  it("leaves a new routine empty without calling bootstrap or inserting anything", async () => {
+describe("routine preserves the base document and real data", () => {
+  it("initializes the base document only for a new empty routine", async () => {
     const snapshot = await getRoutineSnapshot();
-    expect(snapshot.sections).toEqual([]);
+    expect(snapshot.sections[0].items[0]).toMatchObject({
+      title: "Rendez-vous du jour",
+      isPermanent: true,
+      sourceTag: null,
+    });
     expect(snapshot.completedItemIds.size).toBe(0);
-    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("bootstrap_routine");
     expect(mocks.insert).not.toHaveBeenCalled();
     expect(mocks.from.mock.calls.map(([table]) => table)).toEqual([
+      "routine_categories",
       "routine_categories",
       "routine_items",
       "routine_item_completions",
     ]);
   });
 
-  it("does not recreate defaults on subsequent empty loads", async () => {
+  it("does not recreate individually deleted tasks on subsequent loads", async () => {
     await getRoutineSnapshot();
+    rows.routine_items.data = [];
     await getRoutineSnapshot();
-    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.rpc).toHaveBeenCalledTimes(1);
+    expect(rows.routine_items.data).toEqual([]);
     expect(mocks.insert).not.toHaveBeenCalled();
   });
 
@@ -118,5 +149,11 @@ describe("routine reads real data only", () => {
       user_id: "owner",
     });
     expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
+  it("restores the base model only after an explicit routine reset", async () => {
+    await resetRoutine(["category"]);
+    expect(mocks.remove).toHaveBeenCalledExactlyOnceWith("id", ["category"]);
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("bootstrap_routine");
   });
 });

@@ -16,6 +16,7 @@ import {
   type QuoteStatus,
 } from "@/features/devis/api/quotes-api";
 import { parseTolteckQuoteSummary } from "@/features/outils/bdc/parse-tolteck-quote";
+import { DataListPage } from "@/shared/components/app-shell/DataListPage";
 import { PageCanvas } from "@/shared/components/app-shell/PageCanvas";
 import { cn } from "@/shared/lib/utils";
 
@@ -846,95 +847,95 @@ export function DevisPage() {
   );
 
   return (
-    <PageCanvas title="Devis">
-      <div className="mt-2 flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
-        <p className="max-w-3xl text-sm leading-6 text-slate-500">
-          Suivi commercial des devis créés dans Tolteck. Importez le PDF pour
-          centraliser les informations utiles, sans modifier le document formel.
-        </p>
-        <button
-          className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 bg-seno-700 px-4 text-sm font-medium text-white transition-colors hover:bg-seno-800"
-          onClick={() => {
-            importMutation.reset();
-            setIsImportOpen(true);
-          }}
-          type="button"
-        >
-          <FileUp aria-hidden="true" className="size-4" />
-          Importer un devis
-        </button>
-      </div>
-
-      <section className="mt-5 border border-slate-200 bg-white">
-        <div className="flex flex-col gap-3 border-b border-slate-200 p-4 lg:flex-row lg:items-center lg:justify-between">
-          <label className="relative block flex-1">
-            <Search
-              aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              aria-label="Rechercher un devis"
-              className="h-10 w-full border border-slate-300 bg-white py-2 pr-3 pl-9 text-sm outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="N° de devis, client, projet…"
-              value={search}
-            />
-          </label>
-          <button
-            className={cn(
-              "flex h-10 shrink-0 cursor-pointer items-center gap-2 border px-3 text-sm font-medium transition-colors",
-              showRequired
-                ? "border-amber-500 bg-amber-50 text-amber-900"
-                : "border-slate-300 text-slate-700 hover:bg-slate-50",
-            )}
-            onClick={() => setShowRequired((current) => !current)}
-            type="button"
-          >
-            <AlertCircle aria-hidden="true" className="size-4" />
-            {requiredCount} action{requiredCount > 1 ? "s" : ""} requise
-            {requiredCount > 1 ? "s" : ""}
-          </button>
-        </div>
-
-        <div className="flex gap-px overflow-x-auto border-b border-slate-200 bg-slate-100 p-2">
-          <button
-            className={cn(
-              "h-9 shrink-0 cursor-pointer px-3 text-sm font-medium transition-colors",
-              statusFilter === "ALL"
-                ? "bg-white text-seno-900 shadow-sm"
-                : "text-slate-600 hover:bg-white/60",
-            )}
-            onClick={() => setStatusFilter("ALL")}
-            type="button"
-          >
-            Tous{" "}
-            <span className="ml-1 text-xs text-slate-400">
-              {quoteRows.length}
-            </span>
-          </button>
-          {quoteStatuses.map((status) => (
+    <DataListPage
+      title="Devis"
+      toolbar={
+        <>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="relative min-w-[150px] flex-1 sm:max-w-sm">
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute top-1/2 left-3 size-3.5 -trangray-y-1/2 text-gray-400"
+              />
+              <input
+                aria-label="Rechercher un devis"
+                className="w-full border border-gray-200 bg-gray-50 py-1.5 pr-3 pl-9 text-sm transition-colors outline-none focus:border-seno-700 focus:bg-white"
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Rechercher un devis, client, projet…"
+                value={search}
+              />
+            </label>
             <button
-              className={cn(
-                "h-9 shrink-0 cursor-pointer px-3 text-sm font-medium transition-colors",
-                statusFilter === status
-                  ? "bg-white text-seno-900 shadow-sm"
-                  : "text-slate-600 hover:bg-white/60",
-              )}
-              key={status}
-              onClick={() => setStatusFilter(status)}
+              className="flex shrink-0 cursor-pointer items-center gap-2 bg-seno-700 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-seno-800"
+              onClick={() => {
+                importMutation.reset();
+                setIsImportOpen(true);
+              }}
               type="button"
             >
-              {statusLabels[status]}{" "}
-              <span className="ml-1 text-xs text-slate-400">
-                {statusCounts[status]}
-              </span>
+              <FileUp aria-hidden="true" className="size-3.5" />
+              Importer un devis
             </button>
-          ))}
-        </div>
-
+          </div>
+          <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
+            {[
+              { id: "ALL" as const, label: "Tous", count: quoteRows.length },
+              ...quoteStatuses.map((status) => ({
+                id: status,
+                label: statusLabels[status],
+                count: statusCounts[status],
+              })),
+            ].map((entry) => (
+              <button
+                aria-pressed={statusFilter === entry.id}
+                className={cn(
+                  "flex shrink-0 cursor-pointer items-center gap-1.5 px-3 py-1 text-xs font-medium whitespace-nowrap transition-colors",
+                  statusFilter === entry.id
+                    ? "bg-seno-700 text-white"
+                    : "text-gray-500 hover:bg-gray-100",
+                )}
+                key={entry.id}
+                onClick={() => setStatusFilter(entry.id)}
+                type="button"
+              >
+                {entry.label}
+                <span
+                  className={cn(
+                    "rounded-full px-1 text-[10px]",
+                    statusFilter === entry.id
+                      ? "bg-white/20 text-white"
+                      : "bg-gray-100 text-gray-400",
+                  )}
+                >
+                  {entry.count}
+                </span>
+              </button>
+            ))}
+            {requiredCount > 0 ? (
+              <button
+                aria-pressed={showRequired}
+                className={cn(
+                  "ml-2 flex shrink-0 cursor-pointer items-center gap-1.5 border px-3 py-1 text-xs font-medium whitespace-nowrap",
+                  showRequired
+                    ? "border-orange-400 bg-orange-100 text-orange-700"
+                    : "border-orange-200 bg-orange-50 text-orange-600",
+                )}
+                onClick={() => setShowRequired((current) => !current)}
+                type="button"
+              >
+                <AlertCircle aria-hidden="true" className="size-[11px]" />
+                {requiredCount} action{requiredCount > 1 ? "s" : ""} requise
+                {requiredCount > 1 ? "s" : ""}
+              </button>
+            ) : null}
+          </div>
+        </>
+      }
+    >
+      <section className="overflow-x-auto border border-gray-200 bg-white">
         <div className="overflow-x-auto">
           <table className="min-w-[1060px] w-full border-collapse text-left">
-            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] tracking-[0.1em] text-slate-500 uppercase">
+            <thead className="border-b border-gray-200 bg-gray-50 text-xs tracking-widest text-gray-400 uppercase">
               <tr>
                 <th className="px-4 py-3 font-semibold">N° devis</th>
                 <th className="px-4 py-3 font-semibold">Client</th>
@@ -948,10 +949,10 @@ export function DevisPage() {
                 <th className="w-18 px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-gray-100">
               {visibleQuotes.map((quote) => (
                 <tr
-                  className="cursor-pointer transition-colors hover:bg-slate-50"
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
                   key={quote.id}
                   onClick={() => {
                     updateMutation.reset();
@@ -959,11 +960,11 @@ export function DevisPage() {
                     setQuoteDraft(createDraft(quote));
                   }}
                 >
-                  <td className="px-4 py-3 font-mono text-xs font-medium text-slate-600">
+                  <td className="px-4 py-3 font-mono text-xs font-medium text-gray-600">
                     {quote.quoteNumber}
                   </td>
                   <td className="max-w-48 px-4 py-3">
-                    <p className="truncate text-sm font-medium text-slate-800">
+                    <p className="truncate text-sm font-medium text-gray-800">
                       {quote.clientName}
                     </p>
                     {!quote.clientId ? (
@@ -973,27 +974,27 @@ export function DevisPage() {
                     ) : null}
                   </td>
                   <td className="max-w-85 px-4 py-3">
-                    <p className="truncate text-sm text-slate-700">
+                    <p className="truncate text-sm text-gray-700">
                       {quote.title || "—"}
                     </p>
                     {quote.projectAddress ? (
-                      <p className="mt-1 truncate text-xs text-slate-500">
+                      <p className="mt-1 truncate text-xs text-gray-500">
                         {quote.projectAddress}
                       </p>
                     ) : null}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm font-semibold text-slate-800">
+                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-800">
                     {formatCurrency(quote.totalTtc)}
                   </td>
                   <td className="px-4 py-3">
                     <QuoteStatusBadge status={quote.status} />
                   </td>
-                  <td className="max-w-80 px-4 py-3 text-sm text-slate-600">
+                  <td className="max-w-80 px-4 py-3 text-sm text-gray-600">
                     {quote.lastActionNote ? (
                       <>
                         <p className="truncate">{quote.lastActionNote}</p>
                         {quote.lastActionAt ? (
-                          <p className="mt-1 text-xs text-slate-400">
+                          <p className="mt-1 text-xs text-gray-400">
                             {formatDate(quote.lastActionAt)}
                           </p>
                         ) : null}
@@ -1008,7 +1009,7 @@ export function DevisPage() {
                       quote.nextFollowUpAt &&
                         quote.nextFollowUpAt < getTodayIso()
                         ? "font-medium text-red-700"
-                        : "text-slate-600",
+                        : "text-gray-600",
                     )}
                   >
                     {getFollowUp(quote)}
@@ -1016,7 +1017,7 @@ export function DevisPage() {
                   <td className="px-4 py-3">
                     <button
                       aria-label={`Ouvrir le PDF ${quote.quoteNumber}`}
-                      className="grid size-8 cursor-pointer place-items-center border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="grid size-8 cursor-pointer place-items-center border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={documentMutation.isPending}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -1047,12 +1048,12 @@ export function DevisPage() {
               {visibleQuotes.length === 0 ? (
                 <tr>
                   <td className="px-5 py-14 text-center" colSpan={8}>
-                    <p className="text-sm font-medium text-slate-800">
+                    <p className="text-sm font-medium text-gray-800">
                       {quoteRows.length === 0
                         ? "Aucun devis importé"
                         : "Aucun devis ne correspond aux filtres"}
                     </p>
-                    <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-500">
+                    <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-gray-500">
                       {quoteRows.length === 0
                         ? "Importez le PDF Tolteck pour commencer le suivi commercial."
                         : "Ajuste la recherche ou les filtres pour afficher d’autres devis."}
@@ -1064,7 +1065,7 @@ export function DevisPage() {
           </table>
         </div>
 
-        <footer className="flex items-center justify-between border-t border-slate-200 px-4 py-3 text-xs text-slate-500">
+        <footer className="flex items-center justify-between border-t border-gray-200 px-4 py-3 text-xs text-gray-500">
           <span>
             {visibleQuotes.length} devis affiché
             {visibleQuotes.length > 1 ? "s" : ""}
@@ -1128,6 +1129,6 @@ export function DevisPage() {
           onSave={(file, draft) => importMutation.mutate({ file, draft })}
         />
       ) : null}
-    </PageCanvas>
+    </DataListPage>
   );
 }

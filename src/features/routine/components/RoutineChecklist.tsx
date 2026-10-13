@@ -1,13 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  CheckSquare2,
+  CheckSquare,
   ChevronDown,
   ChevronUp,
-  MinusSquare,
   Plus,
   RotateCcw,
-  SlidersHorizontal,
+  Settings2,
   Square,
   Trash2,
   Zap,
@@ -64,7 +63,7 @@ function TaskRow({
         htmlFor={taskInputId}
       >
         {completed ? (
-          <CheckSquare2
+          <CheckSquare
             aria-hidden="true"
             className="size-[15px] text-[#00365A]"
           />
@@ -95,7 +94,7 @@ function TaskRow({
                 : "border-[#00365A]/20 bg-[#E8F0F6] text-[#00365A]",
             )}
           >
-            <Zap aria-hidden="true" className="size-2.5" />
+            <Zap aria-hidden="true" className="size-[9px]" />
             {task.sourceTag}
           </span>
         ) : null}
@@ -276,7 +275,8 @@ export function RoutineChecklist() {
               {urgentTasks > 0 ? (
                 <span className="flex items-center gap-1.5 border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-700">
                   <Zap aria-hidden="true" className="size-[11px]" />
-                  {urgentTasks} actions urgentes
+                  {urgentTasks} action{urgentTasks > 1 ? "s" : ""} urgente
+                  {urgentTasks > 1 ? "s" : ""}
                 </span>
               ) : null}
               <button
@@ -300,7 +300,7 @@ export function RoutineChecklist() {
                 onClick={() => void navigate({ to: "/routine/parametres" })}
                 type="button"
               >
-                <SlidersHorizontal aria-hidden="true" className="size-[11px]" />
+                <Settings2 aria-hidden="true" className="size-[11px]" />
                 Personnaliser
               </button>
             </div>
@@ -355,12 +355,12 @@ export function RoutineChecklist() {
                   type="button"
                 >
                   {allCompleted ? (
-                    <CheckSquare2
+                    <CheckSquare
                       aria-hidden="true"
                       className="size-[15px] text-[#00365A]"
                     />
                   ) : partiallyCompleted ? (
-                    <MinusSquare
+                    <CheckSquare
                       aria-hidden="true"
                       className="size-[15px] text-gray-300"
                     />
@@ -377,7 +377,7 @@ export function RoutineChecklist() {
                   onClick={() => toggleCollapsedSection(section.id)}
                   type="button"
                 >
-                  <span className="text-xs font-bold tracking-widest text-gray-700">
+                  <span className="text-xs font-bold tracking-widest text-gray-700 uppercase">
                     {section.name}
                   </span>
                   <span

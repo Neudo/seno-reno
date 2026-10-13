@@ -81,11 +81,23 @@ function throwIfError(error: { message: string } | null) {
 export async function getRoutineSnapshot(): Promise<RoutineSnapshot> {
   const client = getClient();
   const routineDate = getRoutineDate();
-  const [categoriesResult, itemsResult, completionsResult] = await Promise.all([
+  const fetchCategories = () =>
     client
       .from("routine_categories")
       .select("id, name, color, position")
-      .order("position", { ascending: true }),
+      .order("position", { ascending: true });
+
+  let categoriesResult = await fetchCategories();
+  throwIfError(categoriesResult.error);
+
+  if ((categoriesResult.data ?? []).length === 0) {
+    const bootstrapResult = await client.rpc("bootstrap_routine");
+    throwIfError(bootstrapResult.error);
+    categoriesResult = await fetchCategories();
+    throwIfError(categoriesResult.error);
+  }
+
+  const [itemsResult, completionsResult] = await Promise.all([
     client
       .from("routine_items")
       .select(
@@ -98,7 +110,6 @@ export async function getRoutineSnapshot(): Promise<RoutineSnapshot> {
       .eq("routine_date", routineDate),
   ]);
 
-  throwIfError(categoriesResult.error);
   throwIfError(itemsResult.error);
   throwIfError(completionsResult.error);
 
@@ -306,4 +317,16 @@ export async function updateRoutineItemOrder(itemIds: string[]) {
       throwIfError(result.error);
     }),
   );
+}
+
+export async function resetRoutine(categoryIds: string[]) {
+  if (categoryIds.length > 0) {
+    const result = await getClient()
+      .from("routine_categories")
+      .delete()
+      .in("id", categoryIds);
+    throwIfError(result.error);
+  }
+  const result = await getClient().rpc("bootstrap_routine");
+  throwIfError(result.error);
 }

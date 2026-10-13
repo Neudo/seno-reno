@@ -6,9 +6,17 @@ import {
   FileText,
   HardHat,
   Home,
+  LayoutDashboard,
+  PieChart,
+  Receipt,
+  RefreshCw,
   Settings,
   ShoppingBasket,
   UsersRound,
+  UserRound,
+  TrendingUp,
+  Wallet,
+  FileOutput,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -35,6 +43,7 @@ export type AppPath =
   | "/parametres";
 
 export type NavigationChild = {
+  icon: LucideIcon;
   label: string;
   path: AppPath;
 };
@@ -57,9 +66,9 @@ export const primaryNavigation: NavigationItem[] = [
   { icon: ClipboardList, label: "Routine", path: "/routine" },
   {
     children: [
-      { label: "Clients", path: "/clients" },
-      { label: "Prospection", path: "/prospection" },
-      { label: "Statistiques", path: "/statistiques" },
+      { icon: UserRound, label: "Clients", path: "/clients" },
+      { icon: UsersRound, label: "Prospection", path: "/prospection" },
+      { icon: TrendingUp, label: "Statistiques", path: "/statistiques" },
     ],
     icon: UsersRound,
     label: "Clients & prospects",
@@ -70,19 +79,27 @@ export const primaryNavigation: NavigationItem[] = [
   { icon: CalendarDays, label: "Planning", path: "/planning" },
   {
     children: [
-      { label: "Vue d’ensemble", path: "/finances" },
-      { label: "Trésorerie", path: "/tresorerie" },
-      { label: "Charges fixes", path: "/charges-fixes" },
-      { label: "Marges", path: "/marges" },
-      { label: "Remboursements PE", path: "/remboursements-pe" },
+      { icon: LayoutDashboard, label: "Vue d’ensemble", path: "/finances" },
+      { icon: Wallet, label: "Trésorerie", path: "/tresorerie" },
+      { icon: Receipt, label: "Charges fixes", path: "/charges-fixes" },
+      { icon: PieChart, label: "Marges", path: "/marges" },
+      {
+        icon: RefreshCw,
+        label: "Remboursements PE",
+        path: "/remboursements-pe",
+      },
     ],
     icon: BarChart3,
     label: "Finances",
   },
   {
     children: [
-      { label: "Contrat sous-traitant", path: "/contrat-sous-traitant" },
-      { label: "Génération BDC", path: "/generation-bdc" },
+      {
+        icon: FileText,
+        label: "Contrat sous-traitant",
+        path: "/contrat-sous-traitant",
+      },
+      { icon: FileOutput, label: "Génération BDC", path: "/generation-bdc" },
     ],
     icon: Wrench,
     label: "Outils",
