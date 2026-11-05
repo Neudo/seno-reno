@@ -55,6 +55,7 @@ import {
 } from "@/features/chantiers/api/chantiers-api";
 import { ChantierCreatePage } from "@/features/chantiers/pages/ChantierCreatePage";
 import { getQuoteDocumentUrl } from "@/features/devis/api/quotes-api";
+import { ContractGenerationDialog } from "@/features/outils/subcontracting/ContractGenerationDialog";
 import { cn } from "@/shared/lib/utils";
 
 const ModifiedQuotePreview = lazy(() =>
@@ -1626,6 +1627,16 @@ function Subcontractors({ detail }: { detail: ChantierDetail }) {
                     {commitment.comment}
                   </p>
                 ) : null}
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <ContractGenerationDialog
+                    context={{
+                      siteName: detail.chantier.name,
+                      siteAddress: detail.chantier.address,
+                      serviceDescription: commitment.serviceDescription,
+                      subcontractor: commitment.subcontractor,
+                    }}
+                  />
+                </div>
               </article>
             ))}
           </div>

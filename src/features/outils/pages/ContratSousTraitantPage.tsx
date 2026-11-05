@@ -6,12 +6,7 @@ import {
   LoaderCircle,
   UploadCloud,
 } from "lucide-react";
-import {
-  useRef,
-  useState,
-  type ChangeEvent,
-  type DragEvent,
-} from "react";
+import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 
 import {
   getSubcontractorContractReferenceFiles,
@@ -20,6 +15,7 @@ import {
   type SubcontractorContractReferenceSlot,
   uploadSubcontractorContractReferenceFile,
 } from "@/features/outils/api/subcontractor-contract-api";
+import { ContractPrincipalSettings } from "@/features/outils/subcontracting/ContractPrincipalSettings";
 import { useAuth } from "@/features/auth/context/AuthProvider";
 import { PageCanvas } from "@/shared/components/app-shell/PageCanvas";
 import { Button } from "@/shared/components/ui/button";
@@ -108,11 +104,15 @@ function ReferenceFileCard({
 
       {file ? (
         <div className="mt-6 border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="truncate text-sm font-medium text-slate-900" title={file.fileName}>
+          <p
+            className="truncate text-sm font-medium text-slate-900"
+            title={file.fileName}
+          >
             {file.fileName}
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            {formatFileSize(file.fileSize)} · Déposé le {formatDate(file.updatedAt)}
+            {formatFileSize(file.fileSize)} · Déposé le{" "}
+            {formatDate(file.updatedAt)}
           </p>
         </div>
       ) : null}
@@ -136,7 +136,10 @@ function ReferenceFileCard({
           ref={inputRef}
           type="file"
         />
-        <UploadCloud className="mx-auto size-5 text-seno-700" strokeWidth={1.7} />
+        <UploadCloud
+          className="mx-auto size-5 text-seno-700"
+          strokeWidth={1.7}
+        />
         <p className="mt-3 text-sm text-slate-600">
           Déposez un fichier ici ou choisissez-le depuis votre ordinateur.
         </p>
@@ -172,7 +175,7 @@ function ReferenceFileCard({
   );
 }
 
-export function ContratSousTraitantPage() {
+function ContractReferenceFiles() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
@@ -226,20 +229,15 @@ export function ContratSousTraitantPage() {
 
   if (referenceFilesQuery.isPending) {
     return (
-      <PageCanvas title="Contrat sous-traitant">
-        <div className="mt-5 h-72 animate-pulse border border-slate-200 bg-white" />
-      </PageCanvas>
+      <div className="mt-5 h-72 animate-pulse border border-slate-200 bg-white" />
     );
   }
 
   if (referenceFilesQuery.isError || !referenceFilesQuery.data) {
     return (
-      <PageCanvas title="Contrat sous-traitant">
-        <div className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger les fichiers témoins. Vérifiez que la migration a
-          bien été appliquée, puis réessayez.
-        </div>
-      </PageCanvas>
+      <p className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        Impossible de charger les fichiers témoins. Réessayez dans un instant.
+      </p>
     );
   }
 
@@ -251,12 +249,7 @@ export function ContratSousTraitantPage() {
     : undefined;
 
   return (
-    <PageCanvas title="Contrat sous-traitant">
-      <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
-        Déposez deux fichiers témoins. Ils serviront à une future génération de
-        PDF.
-      </p>
-
+    <>
       {error ? (
         <div className="mt-5 flex gap-3 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           <AlertCircle className="mt-0.5 size-4 shrink-0" />
@@ -286,6 +279,33 @@ export function ContratSousTraitantPage() {
             slot={slot}
           />
         ))}
+      </div>
+    </>
+  );
+}
+
+export function ContratSousTraitantPage() {
+  return (
+    <PageCanvas title="Contrat sous-traitant">
+      <div className="mt-2 grid max-w-4xl gap-5">
+        <p className="text-sm leading-6 text-muted-foreground">
+          Gérez les coordonnées de la société et les fichiers témoins. Les PDF
+          se génèrent depuis l’onglet Sous-traitants du chantier.
+        </p>
+        <ContractPrincipalSettings />
+        <section aria-labelledby="contract-reference-files">
+          <h2
+            className="text-sm font-semibold text-foreground"
+            id="contract-reference-files"
+          >
+            Fichiers témoins
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Consultez ou déposez vos fichiers de référence. Les remplacer ici ne
+            modifie pas le texte des modèles de génération.
+          </p>
+          <ContractReferenceFiles />
+        </section>
       </div>
     </PageCanvas>
   );

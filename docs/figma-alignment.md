@@ -31,4 +31,14 @@ Source : `data/Mini CRM design for construction/src`. L’export est conservé s
 - Le statut acheté est enregistré dans `purchased_at`, indépendamment du paiement. Un retrait de la liste change uniquement `add_to_shopping_list`.
 - Les articles Divers sont persistés dans `shopping_list_items` avec des politiques d’accès par propriétaire.
 - Les quantités libres de la maquette sont conservées dans `quantity_label`, sans modifier les anciennes quantités numériques.
-- Les deux migrations Achats ont été appliquées uniquement à Supabase local, sans reset. Elles restent à appliquer en production avant d’y utiliser cette version.
+- Les migrations Achats sont appliquées à Supabase local et, avec autorisation, au projet de production `seno-reno` (`uszqhrszxsheueutcrye`). Aucun reset n’a été exécuté.
+
+## Mise à jour de la base de production — 13 octobre 2026
+
+- Les deux migrations Achats ont été précédées des quatre migrations nécessaires au parcours chantier : achats et commandes, structure de la fiche, colonnes et stockage privé des documents, création depuis un devis non signé. La fiche charge ces données avant de donner accès au formulaire d’achat.
+- Une septième migration, `index_chantier_detail_foreign_keys`, ajoute les index des quatre clés étrangères composites vers les chantiers ; elle est également appliquée en local. Le contrôle Supabase ne signale plus ces index manquants.
+- Un test SQL sous le rôle `authenticated` a vérifié la création depuis un devis non signé sans changer son statut, le filtrage des achats cochés, le statut acheté indépendant du paiement, le retrait sans suppression de l’achat, les articles Divers et l’isolation entre comptes. Toutes les données de test ont été annulées par `ROLLBACK`.
+- Les empreintes et les nombres de lignes des comptes, clients, devis, chantiers et tables Routine sont identiques avant et après cette mise à jour. Les nouvelles tables ne contiennent aucun article ou document de test.
+- Les droits des nouvelles tables sont accordés aux comptes connectés et limités au propriétaire par RLS ; aucun accès anonyme n’est accordé.
+- Alerte de sécurité préexistante, non modifiée : la [protection contre les mots de passe compromis](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) est désactivée.
+- Cette intervention met à jour la base uniquement. Aucun déploiement du frontend n’a été effectué.
