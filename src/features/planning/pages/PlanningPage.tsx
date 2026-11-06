@@ -1,3 +1,4 @@
+import { SelectField } from "@/shared/components/SelectField";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { CalendarDays, ChevronLeft, ChevronRight, List } from "lucide-react";
@@ -9,7 +10,6 @@ import {
   type ChantierRecord,
   type ChantierStatus,
 } from "@/features/chantiers/api/chantiers-api";
-import { inputClassName } from "@/features/clients-prospects/components/client-prospecting-ui";
 import {
   getMonthDays,
   getPlanningChantiers,
@@ -281,19 +281,18 @@ export function PlanningContent({
             >
               Chantier
             </label>
-            <select
-              className={inputClassName}
+            <SelectField
               id="planning-chantier"
-              onChange={(event) => selectChantier(event.target.value)}
+              onValueChange={(value) => selectChantier(value)}
               value={selectedChantierId}
-            >
-              <option value="">Tous les chantiers</option>
-              {chantierOptions.map((chantier) => (
-                <option key={chantier.id} value={chantier.id}>
-                  {chantier.name}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: "", label: "Tous les chantiers" },
+                ...chantierOptions.map((chantier) => ({
+                  value: chantier.id,
+                  label: chantier.name,
+                })),
+              ]}
+            />
           </div>
           <div
             aria-label="Affichage du planning"

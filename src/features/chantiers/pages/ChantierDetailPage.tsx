@@ -1,3 +1,4 @@
+import { SelectField } from "@/shared/components/SelectField";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
@@ -56,7 +57,9 @@ import {
 import { ChantierCreatePage } from "@/features/chantiers/pages/ChantierCreatePage";
 import { getQuoteDocumentUrl } from "@/features/devis/api/quotes-api";
 import { ContractGenerationDialog } from "@/features/outils/subcontracting/ContractGenerationDialog";
+import { inputClassName } from "@/features/clients-prospects/components/client-prospecting-ui";
 import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/components/ui/button";
 
 const ModifiedQuotePreview = lazy(() =>
   import("@/features/chantiers/components/ModifiedQuotePreview").then(
@@ -433,19 +436,16 @@ function DepositDialog({
           </label>
           <label className="grid gap-1.5">
             <span className="text-sm font-medium text-slate-700">Statut</span>
-            <select
-              className="h-10 cursor-pointer border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-              onChange={(event) =>
-                update("status", event.target.value as DepositStatus)
+            <SelectField
+              onValueChange={(value) =>
+                update("status", value as DepositStatus)
               }
               value={nextDraft.status}
-            >
-              {depositStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {depositStatusLabels[status]}
-                </option>
-              ))}
-            </select>
+              options={depositStatuses.map((status) => ({
+                value: status,
+                label: depositStatusLabels[status],
+              }))}
+            />
           </label>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -982,40 +982,31 @@ function ProcurementDialog({
                   <span className="text-xs font-medium text-gray-500">
                     Statut commande
                   </span>
-                  <select
-                    className="h-10 cursor-pointer border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-                    onChange={(event) =>
-                      update("orderStatus", event.target.value as OrderStatus)
+                  <SelectField
+                    onValueChange={(value) =>
+                      update("orderStatus", value as OrderStatus)
                     }
                     value={nextDraft.orderStatus}
-                  >
-                    {orderStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {orderStatusLabels[status]}
-                      </option>
-                    ))}
-                  </select>
+                    options={orderStatuses.map((status) => ({
+                      value: status,
+                      label: orderStatusLabels[status],
+                    }))}
+                  />
                 </label>
                 <label className="grid gap-1">
                   <span className="text-xs font-medium text-gray-500">
                     Statut paiement
                   </span>
-                  <select
-                    className="h-10 cursor-pointer border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-                    onChange={(event) =>
-                      update(
-                        "paymentStatus",
-                        event.target.value as PaymentStatus,
-                      )
+                  <SelectField
+                    onValueChange={(value) =>
+                      update("paymentStatus", value as PaymentStatus)
                     }
                     value={nextDraft.paymentStatus}
-                  >
-                    {paymentStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {paymentStatusLabels[status]}
-                      </option>
-                    ))}
-                  </select>
+                    options={paymentStatuses.map((status) => ({
+                      value: status,
+                      label: paymentStatusLabels[status],
+                    }))}
+                  />
                 </label>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -1249,6 +1240,10 @@ function Purchases({ detail }: { detail: ChantierDetail }) {
 }
 
 type SubcontractorCommitmentDraft = {
+  contractNumber: string;
+  purchaseOrderNumber: string;
+  signatureCity: string;
+  signatureDate: string;
   actualAmount: string;
   comment: string;
   dueDate: string;
@@ -1259,34 +1254,46 @@ type SubcontractorCommitmentDraft = {
   subcontractorId: string;
 };
 
-function createSubcontractorCommitmentDraft(): SubcontractorCommitmentDraft {
+function createSubcontractorCommitmentDraft(
+  commitment?: ChantierDetail["subcontractorCommitments"][number],
+): SubcontractorCommitmentDraft {
   return {
-    actualAmount: "",
-    comment: "",
-    dueDate: "",
-    forecastAmount: "",
-    paidAmount: "",
-    paymentStatus: "UNPAID",
-    serviceDescription: "",
-    subcontractorId: "",
+    actualAmount: commitment?.actualAmount?.toString() ?? "",
+    comment: commitment?.comment ?? "",
+    dueDate: commitment?.dueDate ?? "",
+    forecastAmount: commitment?.forecastAmount?.toString() ?? "",
+    paidAmount: commitment?.paidAmount?.toString() ?? "",
+    paymentStatus: commitment?.paymentStatus ?? "UNPAID",
+    serviceDescription: commitment?.serviceDescription ?? "",
+    subcontractorId: commitment?.subcontractor.id ?? "",
+    contractNumber: commitment?.contractNumber ?? "",
+    purchaseOrderNumber: commitment?.purchaseOrderNumber ?? "",
+    signatureCity: commitment?.signatureCity ?? "",
+    signatureDate: commitment?.signatureDate ?? "",
   };
 }
 
 function SubcontractorCommitmentDialog({
+  commitment,
   detail,
   isSaving,
   onClose,
   onSave,
 }: {
+  commitment?: ChantierDetail["subcontractorCommitments"][number];
   detail: ChantierDetail;
   isSaving: boolean;
   onClose: () => void;
   onSave: (input: ChantierSubcontractorCommitmentInput) => Promise<void>;
 }) {
-  const [draft, setDraft] = useState(createSubcontractorCommitmentDraft);
+  const [draft, setDraft] = useState(() =>
+    createSubcontractorCommitmentDraft(commitment),
+  );
   const [error, setError] = useState<string | null>(null);
   const availableSubcontractors = detail.availableSubcontractors.filter(
-    (subcontractor) => !subcontractor.isArchived,
+    (subcontractor) =>
+      !subcontractor.isArchived ||
+      subcontractor.id === commitment?.subcontractor.id,
   );
 
   const update = <Key extends keyof SubcontractorCommitmentDraft>(
@@ -1320,6 +1327,10 @@ function SubcontractorCommitmentDialog({
       await onSave({
         actualAmount,
         comment: draft.comment,
+        contractNumber: draft.contractNumber,
+        purchaseOrderNumber: draft.purchaseOrderNumber,
+        signatureCity: draft.signatureCity,
+        signatureDate: draft.signatureDate || null,
         dueDate: draft.dueDate || null,
         forecastAmount,
         paidAmount: paidAmount ?? 0,
@@ -1337,25 +1348,41 @@ function SubcontractorCommitmentDialog({
   };
 
   return (
-    <DetailDialog onClose={onClose} title="Ajouter un sous-traitant">
+    <DetailDialog
+      onClose={onClose}
+      title={
+        commitment
+          ? "Modifier le sous-traitant du chantier"
+          : "Ajouter un sous-traitant"
+      }
+    >
       <form className="grid gap-4 p-5" onSubmit={(event) => void submit(event)}>
         <label className="grid gap-1.5">
           <span className="text-sm font-medium text-slate-700">
             Entreprise / artisan *
           </span>
-          <select
+          <SelectField
             autoFocus
-            className="h-10 cursor-pointer border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-            onChange={(event) => update("subcontractorId", event.target.value)}
+            onValueChange={(value) => {
+              const subcontractorId = value;
+              const existing = detail.subcontractorCommitments.find(
+                (item) => item.subcontractor.id === subcontractorId,
+              );
+              setDraft({
+                ...createSubcontractorCommitmentDraft(existing),
+                subcontractorId,
+              });
+            }}
+            disabled={Boolean(commitment)}
             value={draft.subcontractorId}
-          >
-            <option value="">Sélectionner un sous-traitant</option>
-            {availableSubcontractors.map((subcontractor) => (
-              <option key={subcontractor.id} value={subcontractor.id}>
-                {subcontractor.name}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: "", label: "Sélectionner un sous-traitant" },
+              ...availableSubcontractors.map((subcontractor) => ({
+                value: subcontractor.id,
+                label: subcontractor.name,
+              })),
+            ]}
+          />
         </label>
         {availableSubcontractors.length === 0 ? (
           <p className="border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-5 text-amber-900">
@@ -1374,6 +1401,72 @@ function SubcontractorCommitmentDialog({
             value={draft.serviceDescription}
           />
         </label>
+        <fieldset className="grid gap-4 border-t border-border pt-4">
+          <legend className="text-sm font-semibold text-foreground">
+            Contrat et signature
+          </legend>
+          <p className="text-sm text-muted-foreground">
+            Ces informations seront reprises lors de la génération des
+            documents.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="grid gap-1.5">
+              <span className="text-sm font-medium text-foreground">
+                Numéro de contrat
+              </span>
+              <input
+                className={inputClassName}
+                type="text"
+                maxLength={60}
+                onChange={(event) =>
+                  update("contractNumber", event.target.value)
+                }
+                value={draft.contractNumber}
+              />
+            </label>
+            <label className="grid gap-1.5">
+              <span className="text-sm font-medium text-foreground">
+                Numéro de bon de commande
+              </span>
+              <input
+                className={inputClassName}
+                type="text"
+                maxLength={60}
+                onChange={(event) =>
+                  update("purchaseOrderNumber", event.target.value)
+                }
+                value={draft.purchaseOrderNumber}
+              />
+            </label>
+            <label className="grid gap-1.5">
+              <span className="text-sm font-medium text-foreground">
+                Lieu de signature
+              </span>
+              <input
+                className={inputClassName}
+                type="text"
+                maxLength={100}
+                onChange={(event) =>
+                  update("signatureCity", event.target.value)
+                }
+                value={draft.signatureCity}
+              />
+            </label>
+            <label className="grid gap-1.5">
+              <span className="text-sm font-medium text-foreground">
+                Date de signature
+              </span>
+              <input
+                className={inputClassName}
+                type="date"
+                onChange={(event) =>
+                  update("signatureDate", event.target.value)
+                }
+                value={draft.signatureDate}
+              />
+            </label>
+          </div>
+        </fieldset>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="grid gap-1.5">
             <span className="text-sm font-medium text-slate-700">
@@ -1414,19 +1507,16 @@ function SubcontractorCommitmentDialog({
             <span className="text-sm font-medium text-slate-700">
               Statut paiement
             </span>
-            <select
-              className="h-10 cursor-pointer border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-              onChange={(event) =>
-                update("paymentStatus", event.target.value as PaymentStatus)
+            <SelectField
+              onValueChange={(value) =>
+                update("paymentStatus", value as PaymentStatus)
               }
               value={draft.paymentStatus}
-            >
-              {paymentStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {paymentStatusLabels[status]}
-                </option>
-              ))}
-            </select>
+              options={paymentStatuses.map((status) => ({
+                value: status,
+                label: paymentStatusLabels[status],
+              }))}
+            />
           </label>
         </div>
         <label className="grid gap-1.5">
@@ -1463,7 +1553,11 @@ function SubcontractorCommitmentDialog({
             disabled={isSaving || availableSubcontractors.length === 0}
             type="submit"
           >
-            {isSaving ? "Ajout…" : "Ajouter"}
+            {isSaving
+              ? "Enregistrement…"
+              : commitment
+                ? "Enregistrer"
+                : "Ajouter"}
           </button>
         </footer>
       </form>
@@ -1475,6 +1569,8 @@ function Subcontractors({ detail }: { detail: ChantierDetail }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingCommitment, setEditingCommitment] =
+    useState<ChantierDetail["subcontractorCommitments"][number]>();
   const commitments = detail.subcontractorCommitments;
   const forecastTotal = commitments.reduce(
     (total, commitment) => total + (commitment.forecastAmount ?? 0),
@@ -1544,7 +1640,10 @@ function Subcontractors({ detail }: { detail: ChantierDetail }) {
           <SectionTitle>Sous-traitants</SectionTitle>
           <button
             className="flex h-10 cursor-pointer items-center justify-center gap-2 bg-seno-700 px-3 text-sm font-medium text-white transition-colors hover:bg-seno-800"
-            onClick={() => setIsDialogOpen(true)}
+            onClick={() => {
+              setEditingCommitment(undefined);
+              setIsDialogOpen(true);
+            }}
             type="button"
           >
             <Plus aria-hidden="true" className="size-4" />
@@ -1627,9 +1726,24 @@ function Subcontractors({ detail }: { detail: ChantierDetail }) {
                     {commitment.comment}
                   </p>
                 ) : null}
-                <div className="mt-4 border-t border-slate-100 pt-4">
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    type="button"
+                    onClick={() => {
+                      setEditingCommitment(commitment);
+                      setIsDialogOpen(true);
+                    }}
+                  >
+                    Modifier les informations
+                  </Button>
                   <ContractGenerationDialog
                     context={{
+                      contractNumber: commitment.contractNumber,
+                      purchaseOrderNumber: commitment.purchaseOrderNumber,
+                      signatureCity: commitment.signatureCity,
+                      signatureDate: commitment.signatureDate,
                       siteName: detail.chantier.name,
                       siteAddress: detail.chantier.address,
                       serviceDescription: commitment.serviceDescription,
@@ -1649,6 +1763,7 @@ function Subcontractors({ detail }: { detail: ChantierDetail }) {
       ) : null}
       {isDialogOpen ? (
         <SubcontractorCommitmentDialog
+          commitment={editingCommitment}
           detail={detail}
           isSaving={saveMutation.isPending}
           onClose={() => {
@@ -1798,19 +1913,14 @@ function AdjustmentDialog({
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="grid gap-1.5">
             <span className="text-sm font-medium text-slate-700">Type</span>
-            <select
-              className="h-10 cursor-pointer border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-              onChange={(event) =>
-                update("kind", event.target.value as AdjustmentKind)
-              }
+            <SelectField
+              onValueChange={(value) => update("kind", value as AdjustmentKind)}
               value={draft.kind}
-            >
-              {adjustmentKinds.map((kind) => (
-                <option key={kind} value={kind}>
-                  {adjustmentKindLabels[kind]}
-                </option>
-              ))}
-            </select>
+              options={adjustmentKinds.map((kind) => ({
+                value: kind,
+                label: adjustmentKindLabels[kind],
+              }))}
+            />
           </label>
           <label className="grid gap-1.5">
             <span className="text-sm font-medium text-slate-700">
@@ -1827,19 +1937,16 @@ function AdjustmentDialog({
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="grid gap-1.5">
             <span className="text-sm font-medium text-slate-700">Statut</span>
-            <select
-              className="h-10 cursor-pointer border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-              onChange={(event) =>
-                update("status", event.target.value as AdjustmentStatus)
+            <SelectField
+              onValueChange={(value) =>
+                update("status", value as AdjustmentStatus)
               }
               value={draft.status}
-            >
-              {adjustmentStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {adjustmentStatusLabels[status]}
-                </option>
-              ))}
-            </select>
+              options={adjustmentStatuses.map((status) => ({
+                value: status,
+                label: adjustmentStatusLabels[status],
+              }))}
+            />
           </label>
           <label className="grid gap-1.5">
             <span className="text-sm font-medium text-slate-700">Date</span>
@@ -2193,7 +2300,10 @@ function Adjustments({ detail }: { detail: ChantierDetail }) {
             else addButton.current?.focus();
           }}
           onSave={(input) =>
-            saveMutation.mutateAsync({ id: editor.adjustment?.id, input })
+            saveMutation.mutateAsync({
+              id: editor.adjustment?.id,
+              input,
+            })
           }
         />
       ) : null}
@@ -2264,29 +2374,29 @@ function DocumentDialog({
             className="h-10 border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
             maxLength={240}
             onChange={(event) =>
-              setDraft((current) => ({ ...current, name: event.target.value }))
+              setDraft((current) => ({
+                ...current,
+                name: event.target.value,
+              }))
             }
             value={draft.name}
           />
         </label>
         <label className="grid gap-1.5">
           <span className="text-sm font-medium text-slate-700">Catégorie</span>
-          <select
-            className="h-10 cursor-pointer border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-            onChange={(event) =>
+          <SelectField
+            onValueChange={(value) =>
               setDraft((current) => ({
                 ...current,
-                category: event.target.value as ChantierDocumentCategory,
+                category: value as ChantierDocumentCategory,
               }))
             }
             value={draft.category}
-          >
-            {chantierDocumentCategories.map((category) => (
-              <option key={category} value={category}>
-                {documentCategoryLabels[category]}
-              </option>
-            ))}
-          </select>
+            options={chantierDocumentCategories.map((category) => ({
+              value: category,
+              label: documentCategoryLabels[category],
+            }))}
+          />
         </label>
         <div className="grid gap-1.5">
           <span className="text-sm font-medium text-slate-700">Fichier *</span>

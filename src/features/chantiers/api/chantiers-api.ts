@@ -1,5 +1,10 @@
 import { supabase } from "@/features/auth/api/supabase-client";
-import type { SubcontractorRecord } from "@/features/sous-traitants/api/subcontractors-api";
+import {
+  subcontractorColumns,
+  toSubcontractor,
+  type SubcontractorRecord,
+  type SubcontractorRow,
+} from "@/features/sous-traitants/api/subcontractors-api";
 
 export const chantierStatuses = [
   "PENDING",
@@ -165,6 +170,10 @@ export type ChantierDocument = {
 export type ChantierDocumentInput = Pick<ChantierDocument, "category" | "name">;
 
 export type ChantierSubcontractorCommitment = {
+  contractNumber?: string;
+  purchaseOrderNumber?: string;
+  signatureCity?: string;
+  signatureDate?: string | null;
   actualAmount: number | null;
   comment: string;
   dueDate: string | null;
@@ -247,22 +256,11 @@ type QuoteRow = {
   total_ht: number | string | null;
 };
 
-type SubcontractorRow = {
-  address: string;
-  city: string;
-  contact_name: string;
-  created_at: string;
-  email: string;
-  id: string;
-  is_archived: boolean;
-  name: string;
-  notes: string;
-  phone: string;
-  postal_code: string;
-  updated_at: string;
-};
-
 type ChantierSubcontractorRow = {
+  contract_number?: string;
+  purchase_order_number?: string;
+  signature_city?: string;
+  signature_date?: string | null;
   actual_amount?: number | string | null;
   comment?: string;
   due_date?: string | null;
@@ -380,23 +378,6 @@ function getClientAddress(client: ClientRow) {
   return [client.address, client.postal_code, client.city]
     .filter(Boolean)
     .join(", ");
-}
-
-function toSubcontractor(row: SubcontractorRow): SubcontractorRecord {
-  return {
-    address: row.address,
-    city: row.city,
-    contactName: row.contact_name,
-    createdAt: row.created_at,
-    email: row.email,
-    id: row.id,
-    isArchived: row.is_archived,
-    name: row.name,
-    notes: row.notes,
-    phone: row.phone,
-    postalCode: row.postal_code,
-    updatedAt: row.updated_at,
-  };
 }
 
 function toProcurement(row: ChantierProcurementRow): ChantierProcurement {
@@ -518,9 +499,7 @@ export async function getChantierSnapshot(): Promise<ChantierSnapshot> {
       .order("updated_at", { ascending: false }),
     client
       .from("subcontractors")
-      .select(
-        "id, name, contact_name, email, phone, address, postal_code, city, notes, is_archived, created_at, updated_at",
-      )
+      .select(subcontractorColumns)
       .order("name", { ascending: true }),
     client
       .from("chantier_subcontractors")
@@ -614,7 +593,7 @@ export async function getChantierDetail(
     client
       .from("chantier_subcontractors")
       .select(
-        "chantier_id, subcontractor_id, service_description, forecast_amount, actual_amount, paid_amount, payment_status, due_date, comment",
+        "chantier_id, subcontractor_id, service_description, forecast_amount, actual_amount, paid_amount, payment_status, due_date, comment, contract_number, purchase_order_number, signature_city, signature_date",
       )
       .eq("chantier_id", chantierId),
     chantierRow.initial_quote_id
@@ -656,9 +635,7 @@ export async function getChantierDetail(
       .order("created_at", { ascending: false }),
     client
       .from("subcontractors")
-      .select(
-        "id, name, contact_name, email, phone, address, postal_code, city, notes, is_archived, created_at, updated_at",
-      )
+      .select(subcontractorColumns)
       .order("name", { ascending: true }),
   ]);
 
@@ -704,6 +681,10 @@ export async function getChantierDetail(
 
     return [
       {
+        contractNumber: assignment.contract_number ?? "",
+        purchaseOrderNumber: assignment.purchase_order_number ?? "",
+        signatureCity: assignment.signature_city ?? "",
+        signatureDate: assignment.signature_date ?? null,
         actualAmount: toNumber(assignment.actual_amount ?? null),
         comment: assignment.comment ?? "",
         dueDate: assignment.due_date ?? null,
@@ -942,21 +923,35 @@ export async function saveChantierSubcontractorCommitment({
   input: ChantierSubcontractorCommitmentInput;
   userId: string;
 }) {
-  const result = await getClient().from("chantier_subcontractors").upsert(
-    {
-      actual_amount: input.actualAmount,
-      chantier_id: chantierId,
-      comment: input.comment.trim(),
-      due_date: input.dueDate,
-      forecast_amount: input.forecastAmount,
-      paid_amount: input.paidAmount,
-      payment_status: input.paymentStatus,
-      service_description: input.serviceDescription.trim(),
-      subcontractor_id: input.subcontractorId,
-      user_id: userId,
-    },
-    { onConflict: "chantier_id,subcontractor_id" },
-  );
+  const result = await getClient()
+    .from("chantier_subcontractors")
+    .upsert(
+      {
+        ...(input.contractNumber !== undefined && {
+          contract_number: input.contractNumber.trim(),
+        }),
+        ...(input.purchaseOrderNumber !== undefined && {
+          purchase_order_number: input.purchaseOrderNumber.trim(),
+        }),
+        ...(input.signatureCity !== undefined && {
+          signature_city: input.signatureCity.trim(),
+        }),
+        ...(input.signatureDate !== undefined && {
+          signature_date: input.signatureDate,
+        }),
+        actual_amount: input.actualAmount,
+        chantier_id: chantierId,
+        comment: input.comment.trim(),
+        due_date: input.dueDate,
+        forecast_amount: input.forecastAmount,
+        paid_amount: input.paidAmount,
+        payment_status: input.paymentStatus,
+        service_description: input.serviceDescription.trim(),
+        subcontractor_id: input.subcontractorId,
+        user_id: userId,
+      },
+      { onConflict: "chantier_id,subcontractor_id" },
+    );
 
   throwIfError(result.error);
 }

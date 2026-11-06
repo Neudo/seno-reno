@@ -1,3 +1,4 @@
+import { SelectField } from "@/shared/components/SelectField";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, FileText, FileUp, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -277,54 +278,47 @@ function QuoteFields({
           htmlFor="quote-status"
         >
           Statut commercial
-          <select
-            className={fieldClassName}
+          <SelectField
             id="quote-status"
-            onChange={(event) =>
+            onValueChange={(value) =>
               onUpdate({
                 nextFollowUpAt:
-                  event.target.value === "SIGNED" ||
-                  event.target.value === "REFUSED"
+                  value === "SIGNED" || value === "REFUSED"
                     ? ""
                     : draft.nextFollowUpAt,
-                status: event.target.value as QuoteStatus,
+                status: value as QuoteStatus,
               })
             }
             value={draft.status}
-          >
-            {quoteStatuses.map((status) => (
-              <option key={status} value={status}>
-                {statusLabels[status]}
-              </option>
-            ))}
-          </select>
+            options={quoteStatuses.map((status) => ({
+              value: status,
+              label: statusLabels[status],
+            }))}
+          />
         </label>
         <label
           className="grid gap-1.5 text-sm font-medium text-slate-700"
           htmlFor="quote-client-link"
         >
           Client associé
-          <select
-            className={fieldClassName}
+          <SelectField
             id="quote-client-link"
-            onChange={(event) => {
-              const client = clients.find(
-                (entry) => entry.id === event.target.value,
-              );
+            onValueChange={(value) => {
+              const client = clients.find((entry) => entry.id === value);
               onUpdate({
                 clientId: client?.id ?? "",
                 clientName: client?.name ?? draft.clientName,
               });
             }}
             value={draft.clientId}
-          >
-            <option value="">Sans rattachement</option>
-            {clients.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.name}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: "", label: "Sans rattachement" },
+              ...clients.map((client) => ({
+                value: client.id,
+                label: client.name,
+              })),
+            ]}
+          />
         </label>
       </div>
 

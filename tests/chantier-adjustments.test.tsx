@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   save: vi.fn(),
   remove: vi.fn(),
   detail: vi.fn(),
+  saveCommitment: vi.fn(),
 }));
 vi.mock("@/features/auth/context/AuthProvider", () => ({
   useAuth: () => ({ user: { id: "owner" } }),
@@ -37,6 +38,7 @@ vi.mock("@/features/chantiers/api/chantiers-api", async (importOriginal) => ({
     typeof import("@/features/chantiers/api/chantiers-api")
   >()),
   getChantierDetail: mocks.detail,
+  saveChantierSubcontractorCommitment: mocks.saveCommitment,
   saveChantierAdjustment: mocks.save,
   deleteChantierAdjustment: mocks.remove,
 }));
@@ -44,6 +46,7 @@ vi.mock("@/features/chantiers/api/chantiers-api", async (importOriginal) => ({
 let detail: ChantierDetail;
 beforeEach(() => {
   vi.resetAllMocks();
+  Element.prototype.scrollIntoView = vi.fn();
   detail = {
     chantier: {
       id: "chantier",
@@ -142,15 +145,11 @@ describe("chantier adjustment sheet", () => {
     expect(
       (within(sheet).getByLabelText("Libellé *") as HTMLInputElement).value,
     ).toBe("Variation ajoutée");
-    expect(
-      (within(sheet).getByLabelText("Type") as HTMLSelectElement).value,
-    ).toBe("PLUS");
+    expect(within(sheet).getByLabelText("Type").textContent).toBe("Plus-value");
     expect(
       (within(sheet).getByLabelText("Montant (€) *") as HTMLInputElement).value,
     ).toBe("1500");
-    expect(
-      (within(sheet).getByLabelText("Statut") as HTMLSelectElement).value,
-    ).toBe("PROPOSED");
+    expect(within(sheet).getByLabelText("Statut").textContent).toBe("Proposée");
     expect(
       (within(sheet).getByLabelText("Date") as HTMLInputElement).value,
     ).toBe("2026-10-01");
@@ -177,9 +176,9 @@ describe("chantier adjustment sheet", () => {
       expect(
         (within(sheet).getByLabelText("Date") as HTMLInputElement).value,
       ).toBe("");
-      expect(
-        (within(sheet).getByLabelText("Type") as HTMLSelectElement).value,
-      ).toBe("MINUS");
+      expect(within(sheet).getByLabelText("Type").textContent).toBe(
+        "Moins-value",
+      );
     },
   );
 
@@ -208,9 +207,10 @@ describe("chantier adjustment sheet", () => {
     fireEvent.change(within(sheet).getByLabelText("Montant (€) *"), {
       target: { value: "2 000,50" },
     });
-    fireEvent.change(within(sheet).getByLabelText("Statut"), {
-      target: { value: "ACCEPTED" },
+    fireEvent.keyDown(within(sheet).getByLabelText("Statut"), {
+      key: "ArrowDown",
     });
+    fireEvent.click(await screen.findByRole("option", { name: "Acceptée" }));
     fireEvent.click(within(sheet).getByRole("button", { name: "Enregistrer" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(mocks.save).toHaveBeenCalledWith({
@@ -357,5 +357,92 @@ describe("chantier adjustment sheet", () => {
       "positif ou nul",
     );
     expect(mocks.save).not.toHaveBeenCalled();
+  });
+});
+
+describe("chantier subcontractor contract references", () => {
+  it("edits saved contract references while preserving the financial data", async () => {
+    const subcontractor = {
+      id: "artisan",
+      name: "Artisan test",
+      address: "10 rue test",
+      city: "Auxerre",
+      postalCode: "89000",
+      contactName: "",
+      email: "",
+      phone: "",
+      notes: "",
+      isArchived: false,
+      createdAt: "",
+      updatedAt: "",
+      legalForm: "SARL",
+      capital: "",
+      registryCity: "Auxerre",
+      registrationNumber: "123456789",
+      declarantFirstName: "Jean",
+      declarantLastName: "Martin",
+      declarantRole: "Gérant",
+    };
+    detail.availableSubcontractors = [subcontractor];
+    detail.subcontractorCommitments = [
+      {
+        subcontractor,
+        contractNumber: "C-01",
+        purchaseOrderNumber: "BDC-01",
+        signatureCity: "Auxerre",
+        signatureDate: "2026-11-06",
+        actualAmount: 500,
+        forecastAmount: 800,
+        paidAmount: 100,
+        paymentStatus: "PARTIAL",
+        dueDate: "2026-12-01",
+        serviceDescription: "Menuiserie",
+        comment: "Notes existantes",
+      },
+    ];
+    mount();
+    fireEvent.click(screen.getByRole("button", { name: "Sous-traitants" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Modifier les informations" }),
+    );
+    const dialog = within(
+      screen.getByRole("dialog", {
+        name: "Modifier le sous-traitant du chantier",
+      }),
+    );
+    expect(
+      (dialog.getByLabelText("Numéro de contrat") as HTMLInputElement).value,
+    ).toBe("C-01");
+    expect(
+      (dialog.getByLabelText("Numéro de bon de commande") as HTMLInputElement)
+        .value,
+    ).toBe("BDC-01");
+    expect(
+      (dialog.getByLabelText("Date de signature") as HTMLInputElement).value,
+    ).toBe("2026-11-06");
+    fireEvent.change(dialog.getByLabelText("Numéro de contrat"), {
+      target: { value: "C-02" },
+    });
+    fireEvent.click(dialog.getByRole("button", { name: "Enregistrer" }));
+    await waitFor(() =>
+      expect(mocks.saveCommitment).toHaveBeenCalledWith({
+        chantierId: "chantier",
+        userId: "owner",
+        input: {
+          subcontractorId: "artisan",
+          contractNumber: "C-02",
+          purchaseOrderNumber: "BDC-01",
+          signatureCity: "Auxerre",
+          signatureDate: "2026-11-06",
+          actualAmount: 500,
+          forecastAmount: 800,
+          paidAmount: 100,
+          paymentStatus: "PARTIAL",
+          dueDate: "2026-12-01",
+          serviceDescription: "Menuiserie",
+          comment: "Notes existantes",
+        },
+      }),
+    );
   });
 });

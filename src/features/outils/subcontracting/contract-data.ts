@@ -45,6 +45,10 @@ export type ContractSettings = z.infer<typeof contractSettingsSchema>;
 export type ContractJobData = z.infer<typeof contractJobSchema>;
 
 export type ContractContext = {
+  contractNumber?: string;
+  purchaseOrderNumber?: string;
+  signatureCity?: string;
+  signatureDate?: string | null;
   siteName: string;
   siteAddress: string;
   serviceDescription: string;
@@ -62,10 +66,10 @@ function getPartyDefaults(record?: SubcontractorRecord): ContractParty {
           .filter(Boolean)
           .join(", ")
       : "",
-    legalForm: "",
-    capital: "",
-    registryCity: "",
-    registrationNumber: "",
+    legalForm: record?.legalForm ?? "",
+    capital: record?.capital ?? "",
+    registryCity: record?.registryCity ?? "",
+    registrationNumber: record?.registrationNumber ?? "",
   };
 }
 
@@ -84,15 +88,15 @@ export function getContractJobDefaults(
 ): ContractJobData {
   return {
     siteAddress: context.siteAddress,
-    contractNumber: "",
-    purchaseOrderNumber: "",
+    contractNumber: context.contractNumber ?? "",
+    purchaseOrderNumber: context.purchaseOrderNumber ?? "",
     subcontractor: getPartyDefaults(context.subcontractor),
     specialties: context.serviceDescription,
-    declarantFirstName: "",
-    declarantLastName: "",
-    declarantRole: "",
-    signatureCity: settings.defaultSignatureCity,
-    signatureDate: "",
+    declarantFirstName: context.subcontractor.declarantFirstName ?? "",
+    declarantLastName: context.subcontractor.declarantLastName ?? "",
+    declarantRole: context.subcontractor.declarantRole ?? "",
+    signatureCity: context.signatureCity || settings.defaultSignatureCity,
+    signatureDate: context.signatureDate ?? "",
   };
 }
 

@@ -1,3 +1,4 @@
+import { SelectField } from "@/shared/components/SelectField";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus, Search, X } from "lucide-react";
@@ -192,26 +193,25 @@ function ChantierForm({
           Informations générales
         </p>
         <FieldLabel label="Client *">
-          <select
-            className={inputClassName}
-            onChange={(event) => {
+          <SelectField
+            onValueChange={(value) => {
               const client = availableClients.find(
-                (candidate) => candidate.id === event.target.value,
+                (candidate) => candidate.id === value,
               );
               onUpdate({
                 address: draft.address || client?.address || "",
-                clientId: event.target.value,
+                clientId: value,
               });
             }}
             value={draft.clientId}
-          >
-            <option value="">Sélectionner un client</option>
-            {availableClients.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.name}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: "", label: "Sélectionner un client" },
+              ...availableClients.map((client) => ({
+                value: client.id,
+                label: client.name,
+              })),
+            ]}
+          />
         </FieldLabel>
         {availableClients.length === 0 ? (
           <p className="border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-5 text-amber-900">
@@ -237,19 +237,16 @@ function ChantierForm({
         </FieldLabel>
         <div className="grid gap-3 sm:grid-cols-2">
           <FieldLabel label="Statut">
-            <select
-              className={inputClassName}
-              onChange={(event) =>
-                onUpdate({ status: event.target.value as ChantierStatus })
+            <SelectField
+              onValueChange={(value) =>
+                onUpdate({ status: value as ChantierStatus })
               }
               value={draft.status}
-            >
-              {chantierStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {statusLabels[status]}
-                </option>
-              ))}
-            </select>
+              options={chantierStatuses.map((status) => ({
+                value: status,
+                label: statusLabels[status],
+              }))}
+            />
           </FieldLabel>
           <FieldLabel label="CA prévisionnel HT">
             <input
@@ -386,19 +383,22 @@ function QuoteCreation({
       {candidates.length ? (
         <>
           <FieldLabel label="Devis signé">
-            <select
-              className={inputClassName}
-              onChange={(event) => setSelectedId(event.target.value)}
+            <SelectField
+              onValueChange={(value) => setSelectedId(value)}
               value={selectedId}
-            >
-              <option value="">Sélectionner un devis signé</option>
-              {candidates.map((quote) => (
-                <option key={quote.id} value={quote.id}>
-                  {quote.quoteNumber} · {quote.clientName}
-                  {quote.title ? ` · ${quote.title}` : ""}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: "", label: "Sélectionner un devis signé" },
+                ...candidates.map((quote) => ({
+                  value: quote.id,
+                  label: (
+                    <>
+                      {quote.quoteNumber} · {quote.clientName}
+                      {quote.title ? ` · ${quote.title}` : ""}
+                    </>
+                  ),
+                })),
+              ]}
+            />
           </FieldLabel>
           {selectedQuote ? (
             <div className="border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
@@ -691,21 +691,28 @@ export function ChantiersPage() {
               value={search}
             />
           </label>
-          <select
+          <SelectField
             aria-label="Filtrer par statut"
-            className="min-w-[150px] cursor-pointer border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600"
-            onChange={(event) =>
-              setStatusFilter(event.target.value as "ALL" | ChantierStatus)
+            onValueChange={(value) =>
+              setStatusFilter(value as "ALL" | ChantierStatus)
             }
             value={statusFilter}
-          >
-            <option value="ALL">Tous les statuts ({chantiers.length})</option>
-            {chantierStatuses.map((status) => (
-              <option key={status} value={status}>
-                {statusLabels[status]} ({statusCounts[status]})
-              </option>
-            ))}
-          </select>
+            className="w-auto"
+            options={[
+              {
+                value: "ALL",
+                label: <>Tous les statuts ({chantiers.length})</>,
+              },
+              ...chantierStatuses.map((status) => ({
+                value: status,
+                label: (
+                  <>
+                    {statusLabels[status]} ({statusCounts[status]})
+                  </>
+                ),
+              })),
+            ]}
+          />
           <button
             className="ml-auto flex cursor-pointer items-center justify-center gap-2 bg-seno-700 px-4 py-1.5 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-seno-800"
             onClick={() =>

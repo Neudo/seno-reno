@@ -20,10 +20,15 @@ import { PageCanvas } from "@/shared/components/app-shell/PageCanvas";
 
 type SubcontractorDraft = SubcontractorInput & { id?: string };
 
-function createDraft(
-  subcontractor?: SubcontractorRecord,
-): SubcontractorDraft {
+function createDraft(subcontractor?: SubcontractorRecord): SubcontractorDraft {
   return {
+    legalForm: subcontractor?.legalForm ?? "",
+    capital: subcontractor?.capital ?? "",
+    registryCity: subcontractor?.registryCity ?? "",
+    registrationNumber: subcontractor?.registrationNumber ?? "",
+    declarantFirstName: subcontractor?.declarantFirstName ?? "",
+    declarantLastName: subcontractor?.declarantLastName ?? "",
+    declarantRole: subcontractor?.declarantRole ?? "",
     address: subcontractor?.address ?? "",
     city: subcontractor?.city ?? "",
     contactName: subcontractor?.contactName ?? "",
@@ -123,6 +128,78 @@ function SubcontractorForm({
             />
           </FieldLabel>
         </div>
+      </section>
+
+      <section className="grid gap-3 border-t border-border pt-5">
+        <h3 className="text-xs font-semibold tracking-[0.13em] text-muted-foreground uppercase">
+          Informations du contrat
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Ces informations sont reprises automatiquement dans le contrat et la
+          déclaration sur l’honneur.
+        </p>
+        <FieldLabel label="Forme juridique">
+          <input
+            className={inputClassName}
+            maxLength={100}
+            onChange={(event) => update("legalForm", event.target.value)}
+            value={draft.legalForm}
+          />
+        </FieldLabel>
+        <FieldLabel label="Capital social">
+          <input
+            className={inputClassName}
+            maxLength={60}
+            onChange={(event) => update("capital", event.target.value)}
+            value={draft.capital}
+          />
+        </FieldLabel>
+        <FieldLabel label="Ville du RCS">
+          <input
+            className={inputClassName}
+            maxLength={100}
+            onChange={(event) => update("registryCity", event.target.value)}
+            value={draft.registryCity}
+          />
+        </FieldLabel>
+        <FieldLabel label="Numéro d’immatriculation au RCS">
+          <input
+            className={inputClassName}
+            maxLength={50}
+            onChange={(event) =>
+              update("registrationNumber", event.target.value)
+            }
+            value={draft.registrationNumber}
+          />
+        </FieldLabel>
+        <FieldLabel label="Prénom du déclarant">
+          <input
+            className={inputClassName}
+            maxLength={80}
+            onChange={(event) =>
+              update("declarantFirstName", event.target.value)
+            }
+            value={draft.declarantFirstName}
+          />
+        </FieldLabel>
+        <FieldLabel label="Nom du déclarant">
+          <input
+            className={inputClassName}
+            maxLength={80}
+            onChange={(event) =>
+              update("declarantLastName", event.target.value)
+            }
+            value={draft.declarantLastName}
+          />
+        </FieldLabel>
+        <FieldLabel label="Qualité du déclarant">
+          <input
+            className={inputClassName}
+            maxLength={100}
+            onChange={(event) => update("declarantRole", event.target.value)}
+            value={draft.declarantRole}
+          />
+        </FieldLabel>
       </section>
 
       <section className="grid gap-3 border-t border-slate-200 pt-5">
@@ -252,7 +329,10 @@ export function SousTraitantsPage() {
         queryClient.invalidateQueries({
           queryKey: ["subcontractors", user?.id],
         }),
-        queryClient.invalidateQueries({ queryKey: ["chantiers", user?.id] }),
+        queryClient.invalidateQueries({
+          queryKey: ["chantiers", user?.id],
+        }),
+        queryClient.invalidateQueries({ queryKey: ["chantier", user?.id] }),
       ]);
     },
   });
@@ -370,7 +450,10 @@ export function SousTraitantsPage() {
                       />
                     </td>
                     <td className="px-4 py-4 text-sm text-slate-600">
-                      {getLocation(subcontractor.city, subcontractor.postalCode)}
+                      {getLocation(
+                        subcontractor.city,
+                        subcontractor.postalCode,
+                      )}
                     </td>
                     <td className="px-4 py-4 text-sm text-slate-500">
                       {chantierCounts.get(subcontractor.id) ?? 0}

@@ -111,7 +111,7 @@ beforeEach(() => {
   mocks.parse.mockResolvedValue({
     clientName: "Client local",
     fileName: "devis.pdf",
-    projectAddress: "Adresse du chantier",
+    projectAddress: "Les Chaumes\n89520 MOÛTIERS\nFrance",
     projectTitle: "Rénovation",
     quoteDate: "05/10/2026",
     quoteNumber: "DEV-TEST-1",
@@ -145,6 +145,9 @@ describe("PDF-only chantier form", () => {
       (screen.getByLabelText("Nom du chantier *") as HTMLInputElement).value,
     ).toBe("Rénovation");
     expect(
+      (screen.getByLabelText("Adresse du chantier") as HTMLInputElement).value,
+    ).toBe("Les Chaumes 89520 MOÛTIERS France");
+    expect(
       (screen.getByLabelText("Montant du devis HT") as HTMLInputElement).value,
     ).toBe("32000");
     expect(screen.queryByLabelText(/fin réelle/iu)).toBeNull();
@@ -160,6 +163,7 @@ describe("PDF-only chantier form", () => {
       status: "TO_SEND",
       clientId: "client",
       totalHt: 32000,
+      projectAddress: "Les Chaumes 89520 MOÛTIERS France",
     });
     expect(mocks.create).toHaveBeenCalledWith(
       expect.objectContaining({ quoteId: "imported-quote" }),

@@ -1,3 +1,4 @@
+import { SelectField } from "@/shared/components/SelectField";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
@@ -195,19 +196,14 @@ function ClientForm({
           Suivi
         </p>
         <FieldLabel label="Origine">
-          <select
-            className={inputClassName}
-            onChange={(event) =>
-              update("sourceKind", event.target.value as SourceKind)
-            }
+          <SelectField
+            onValueChange={(value) => update("sourceKind", value as SourceKind)}
             value={draft.sourceKind}
-          >
-            {sourceKinds.map((source) => (
-              <option key={source} value={source}>
-                {sourceLabels[source]}
-              </option>
-            ))}
-          </select>
+            options={sourceKinds.map((source) => ({
+              value: source,
+              label: sourceLabels[source],
+            }))}
+          />
         </FieldLabel>
         <FieldLabel label="Précision sur l’origine">
           <input

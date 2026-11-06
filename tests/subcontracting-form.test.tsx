@@ -13,6 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ContratSousTraitantPage } from "@/features/outils/pages/ContratSousTraitantPage";
 import { ContractGenerationDialog } from "@/features/outils/subcontracting/ContractGenerationDialog";
+import { SousTraitantsPage } from "@/features/sous-traitants/pages/SousTraitantsPage";
 import { ContractGenerationForm } from "@/features/outils/subcontracting/ContractGenerationForm";
 import type {
   ContractContext,
@@ -23,6 +24,8 @@ const mocks = vi.hoisted(() => ({
   generate: vi.fn(),
   getSettings: vi.fn(),
   saveSettings: vi.fn(),
+  getSubcontractors: vi.fn(),
+  saveSubcontractor: vi.fn(),
 }));
 vi.mock("@/features/auth/context/AuthProvider", () => ({
   useAuth: () => ({ user: { id: "owner" } }),
@@ -47,6 +50,16 @@ vi.mock("@/features/outils/api/subcontractor-contract-api", () => ({
   getSubcontractorContractReferenceFileUrl: vi.fn(),
   uploadSubcontractorContractReferenceFile: vi.fn(),
 }));
+vi.mock(
+  "@/features/sous-traitants/api/subcontractors-api",
+  async (importOriginal) => ({
+    ...(await importOriginal<
+      typeof import("@/features/sous-traitants/api/subcontractors-api")
+    >()),
+    getSubcontractorSnapshot: mocks.getSubcontractors,
+    saveSubcontractor: mocks.saveSubcontractor,
+  }),
+);
 vi.mock("@/features/outils/subcontracting/generate-contract-pdfs", () => ({
   generateContractPdfs: mocks.generate,
 }));
@@ -56,6 +69,13 @@ const context: ContractContext = {
   siteAddress: "Adresse du chantier de test",
   serviceDescription: "Pose de menuiseries",
   subcontractor: {
+    legalForm: "",
+    capital: "",
+    registryCity: "",
+    registrationNumber: "",
+    declarantFirstName: "",
+    declarantLastName: "",
+    declarantRole: "",
     id: "artisan-test",
     name: "Atelier de test",
     address: "Adresse du siège de test",
@@ -89,6 +109,11 @@ const revokeObjectURL = vi.fn();
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.getSettings.mockResolvedValue(settings);
+  mocks.getSubcontractors.mockResolvedValue({
+    assignments: [],
+    subcontractors: [],
+  });
+  mocks.saveSubcontractor.mockResolvedValue(undefined);
   mocks.saveSettings.mockImplementation(async (_userId, values) => values);
   mocks.generate.mockResolvedValue([
     {
@@ -128,6 +153,82 @@ function mount(children: ReactNode) {
 }
 
 describe("subcontracting contract form", () => {
+  it("reuses the subcontractor profile and chantier references to generate without retyping", async () => {
+    const rerender = mount(<SousTraitantsPage />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Ajouter un sous-traitant" }),
+    );
+    const values = {
+      "Nom *": "Atelier enregistré",
+      Adresse: "10 rue des Artisans",
+      "Code postal": "89000",
+      Ville: "Auxerre",
+      "Forme juridique": "SAS",
+      "Capital social": "10 000 €",
+      "Ville du RCS": "Sens",
+      "Numéro d’immatriculation au RCS": "123456789",
+      "Prénom du déclarant": "Élodie",
+      "Nom du déclarant": "Martin",
+      "Qualité du déclarant": "Présidente",
+    };
+    for (const [label, value] of Object.entries(values)) {
+      fireEvent.change(screen.getByLabelText(label), { target: { value } });
+    }
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
+    await waitFor(() =>
+      expect(mocks.saveSubcontractor).toHaveBeenCalledTimes(1),
+    );
+    const saved = mocks.saveSubcontractor.mock.calls[0][0].input;
+    expect(saved).toMatchObject({
+      legalForm: "SAS",
+      capital: "10 000 €",
+      registryCity: "Sens",
+      registrationNumber: "123456789",
+      declarantFirstName: "Élodie",
+      declarantLastName: "Martin",
+      declarantRole: "Présidente",
+    });
+    rerender(
+      <ContractGenerationForm
+        context={{
+          ...context,
+          subcontractor: { ...context.subcontractor, ...saved },
+          contractNumber: "C-2026-01",
+          purchaseOrderNumber: "BDC-2026-02",
+          signatureCity: "Joigny",
+          signatureDate: "2026-11-06",
+        }}
+      />,
+    );
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Générer les deux PDF" }),
+    );
+    expect(
+      await screen.findByRole("link", {
+        name: "Télécharger : Contrat de sous-traitance",
+      }),
+    ).toBeTruthy();
+    expect(mocks.generate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subcontractor: {
+          name: "Atelier enregistré",
+          address: "10 rue des Artisans, 89000 Auxerre",
+          legalForm: "SAS",
+          capital: "10 000 €",
+          registryCity: "Sens",
+          registrationNumber: "123456789",
+        },
+        declarantFirstName: "Élodie",
+        declarantLastName: "Martin",
+        declarantRole: "Présidente",
+        contractNumber: "C-2026-01",
+        purchaseOrderNumber: "BDC-2026-02",
+        signatureCity: "Joigny",
+        signatureDate: "2026-11-06",
+      }),
+    );
+  });
+
   it("opens the same form from the chantier card and uses known data without guessing the signatory", async () => {
     mount(<ContractGenerationDialog context={context} />);
     fireEvent.click(

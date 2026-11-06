@@ -23,8 +23,8 @@ export function ContractGenerationDialog({
       <Dialog.Trigger asChild>
         <Button
           aria-label={`Générer les documents pour ${context.subcontractor.name}`}
-          size="sm"
-          variant="outline"
+          size="lg"
+          variant="default"
         >
           <FileText aria-hidden="true" />
           Générer les documents
@@ -39,8 +39,8 @@ export function ContractGenerationDialog({
                 Contrat et déclaration sur l’honneur
               </Dialog.Title>
               <Dialog.Description className="mt-1 text-sm text-muted-foreground">
-                Complétez les informations de {context.subcontractor.name} avant
-                de générer les PDF.
+                Vérifiez les informations de {context.subcontractor.name},
+                reprises depuis sa fiche, puis générez les PDF.
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>

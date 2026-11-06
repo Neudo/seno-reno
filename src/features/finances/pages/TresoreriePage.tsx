@@ -1,3 +1,4 @@
+import { SelectField } from "@/shared/components/SelectField";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronLeft,
@@ -105,7 +106,9 @@ function TreasuryDrawer({
               onClick={() => onUpdate({ direction: "INCOME" })}
               type="button"
             >
-              <span className="block text-sm font-medium text-slate-800">Entrée</span>
+              <span className="block text-sm font-medium text-slate-800">
+                Entrée
+              </span>
               <span className="mt-1 block text-xs leading-5 text-slate-500">
                 Encaissement exceptionnel
               </span>
@@ -120,7 +123,9 @@ function TreasuryDrawer({
               onClick={() => onUpdate({ direction: "EXPENSE" })}
               type="button"
             >
-              <span className="block text-sm font-medium text-slate-800">Sortie</span>
+              <span className="block text-sm font-medium text-slate-800">
+                Sortie
+              </span>
               <span className="mt-1 block text-xs leading-5 text-slate-500">
                 Paiement exceptionnel
               </span>
@@ -154,11 +159,10 @@ function TreasuryDrawer({
             </FieldLabel>
             <FieldLabel htmlFor="movement-status">
               Statut
-              <select
-                className={fieldClassName}
+              <SelectField
                 id="movement-status"
-                onChange={(event) => {
-                  const status = event.target.value as CashMovementStatus;
+                onValueChange={(value) => {
+                  const status = value as CashMovementStatus;
                   onUpdate({
                     actualDate:
                       status === "COMPLETED"
@@ -168,13 +172,11 @@ function TreasuryDrawer({
                   });
                 }}
                 value={draft.status}
-              >
-                {cashMovementStatuses.map((status) => (
-                  <option key={status} value={status}>
-                    {statusLabels[status]}
-                  </option>
-                ))}
-              </select>
+                options={cashMovementStatuses.map((status) => ({
+                  value: status,
+                  label: statusLabels[status],
+                }))}
+              />
             </FieldLabel>
           </div>
 
@@ -184,7 +186,9 @@ function TreasuryDrawer({
               <input
                 className={fieldClassName}
                 id="movement-expected-date"
-                onChange={(event) => onUpdate({ expectedDate: event.target.value })}
+                onChange={(event) =>
+                  onUpdate({ expectedDate: event.target.value })
+                }
                 type="date"
                 value={draft.expectedDate}
               />
@@ -195,7 +199,9 @@ function TreasuryDrawer({
                 <input
                   className={fieldClassName}
                   id="movement-actual-date"
-                  onChange={(event) => onUpdate({ actualDate: event.target.value })}
+                  onChange={(event) =>
+                    onUpdate({ actualDate: event.target.value })
+                  }
                   type="date"
                   value={draft.actualDate}
                 />
@@ -208,7 +214,8 @@ function TreasuryDrawer({
           </div>
 
           <FieldLabel htmlFor="movement-comment">
-            Commentaire <span className="font-normal text-slate-400">(facultatif)</span>
+            Commentaire{" "}
+            <span className="font-normal text-slate-400">(facultatif)</span>
             <textarea
               className={textAreaClassName}
               id="movement-comment"
@@ -220,7 +227,10 @@ function TreasuryDrawer({
           </FieldLabel>
 
           {errorMessage ? (
-            <p className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+            <p
+              className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+              role="alert"
+            >
               {errorMessage}
             </p>
           ) : null}
@@ -259,9 +269,9 @@ export function TresoreriePage() {
     new Date(today.getFullYear(), today.getMonth(), 1),
   );
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | CashMovementStatus | "OVERDUE">(
-    "ALL",
-  );
+  const [statusFilter, setStatusFilter] = useState<
+    "ALL" | CashMovementStatus | "OVERDUE"
+  >("ALL");
   const [draft, setDraft] = useState<MovementDraft | null>(null);
 
   const invalidateFinance = () =>
@@ -322,15 +332,23 @@ export function TresoreriePage() {
       const matchesStatus =
         statusFilter === "ALL" ||
         (statusFilter === "OVERDUE"
-          ? movement.status === "PLANNED" && movement.expectedDate < getTodayIso()
+          ? movement.status === "PLANNED" &&
+            movement.expectedDate < getTodayIso()
           : movement.status === statusFilter);
-      const haystack = `${movement.label} ${movement.comment}`.toLocaleLowerCase(
-        "fr-FR",
-      );
+      const haystack =
+        `${movement.label} ${movement.comment}`.toLocaleLowerCase("fr-FR");
 
-      return matchesMonth && matchesStatus && haystack.includes(normalizedSearch);
+      return (
+        matchesMonth && matchesStatus && haystack.includes(normalizedSearch)
+      );
     });
-  }, [financeQuery.data?.cashMovements, monthRange.end, monthRange.start, search, statusFilter]);
+  }, [
+    financeQuery.data?.cashMovements,
+    monthRange.end,
+    monthRange.start,
+    search,
+    statusFilter,
+  ]);
 
   const summaryMovements = (financeQuery.data?.cashMovements ?? []).filter(
     (movement) =>
@@ -356,8 +374,8 @@ export function TresoreriePage() {
     return (
       <PageCanvas title="Trésorerie">
         <div className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger la trésorerie. Vérifiez que la migration a bien été
-          appliquée, puis réessayez.
+          Impossible de charger la trésorerie. Vérifiez que la migration a bien
+          été appliquée, puis réessayez.
         </div>
       </PageCanvas>
     );
@@ -368,8 +386,9 @@ export function TresoreriePage() {
       <div className="mt-2 flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="max-w-3xl text-sm leading-6 text-slate-500">
-            Prévision et suivi des mouvements exceptionnels. Les encaissements et
-            paiements issus des chantiers seront ajoutés depuis leurs sources.
+            Prévision et suivi des mouvements exceptionnels. Les encaissements
+            et paiements issus des chantiers seront ajoutés depuis leurs
+            sources.
           </p>
           <div className="mt-3 flex items-center gap-2">
             <button
@@ -448,22 +467,21 @@ export function TresoreriePage() {
               value={search}
             />
           </label>
-          <select
+          <SelectField
             aria-label="Filtrer par statut"
-            className="h-10 border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-            onChange={(event) =>
-              setStatusFilter(
-                event.target.value as "ALL" | CashMovementStatus | "OVERDUE",
-              )
+            onValueChange={(value) =>
+              setStatusFilter(value as "ALL" | CashMovementStatus | "OVERDUE")
             }
             value={statusFilter}
-          >
-            <option value="ALL">Tous les statuts</option>
-            <option value="PLANNED">Prévu</option>
-            <option value="COMPLETED">Terminé</option>
-            <option value="OVERDUE">En retard</option>
-            <option value="CANCELLED">Annulé</option>
-          </select>
+            className="w-auto"
+            options={[
+              { value: "ALL", label: "Tous les statuts" },
+              { value: "PLANNED", label: "Prévu" },
+              { value: "COMPLETED", label: "Terminé" },
+              { value: "OVERDUE", label: "En retard" },
+              { value: "CANCELLED", label: "Annulé" },
+            ]}
+          />
         </div>
 
         <div className="overflow-x-auto">
@@ -483,7 +501,10 @@ export function TresoreriePage() {
               {visibleMovements.map((movement) => {
                 const isManual = movement.kind !== "PERSONAL_REIMBURSEMENT";
                 return (
-                  <tr className="transition-colors hover:bg-slate-50" key={movement.id}>
+                  <tr
+                    className="transition-colors hover:bg-slate-50"
+                    key={movement.id}
+                  >
                     <td className="px-4 py-3 text-sm text-slate-600">
                       {formatDate(movement.expectedDate)}
                     </td>
@@ -550,7 +571,9 @@ export function TresoreriePage() {
                           </button>
                         </div>
                       ) : (
-                        <span className="block text-right text-xs text-slate-400">PE</span>
+                        <span className="block text-right text-xs text-slate-400">
+                          PE
+                        </span>
                       )}
                     </td>
                   </tr>
@@ -576,14 +599,18 @@ export function TresoreriePage() {
 
         <footer className="flex items-center justify-between border-t border-slate-200 px-4 py-3 text-xs text-slate-500">
           <span>
-            {visibleMovements.length} mouvement{visibleMovements.length > 1 ? "s" : ""}
+            {visibleMovements.length} mouvement
+            {visibleMovements.length > 1 ? "s" : ""}
           </span>
           <span>Les montants sont exprimés TTC.</span>
         </footer>
       </FinancePanel>
 
       {deleteMutation.isError ? (
-        <p className="mt-3 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+        <p
+          className="mt-3 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          role="alert"
+        >
           {deleteMutation.error instanceof Error
             ? deleteMutation.error.message
             : "Le mouvement n’a pas pu être supprimé."}
@@ -601,7 +628,11 @@ export function TresoreriePage() {
           isSaving={saveMutation.isPending}
           onClose={() => setDraft(null)}
           onSave={() => saveMutation.mutate(draft)}
-          onUpdate={(patch) => setDraft((current) => (current ? { ...current, ...patch } : current))}
+          onUpdate={(patch) =>
+            setDraft((current) =>
+              current ? { ...current, ...patch } : current,
+            )
+          }
         />
       ) : null}
     </PageCanvas>

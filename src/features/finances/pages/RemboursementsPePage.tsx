@@ -1,3 +1,4 @@
+import { SelectField } from "@/shared/components/SelectField";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Pencil, Plus, Search, Trash2, WalletCards } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -84,20 +85,17 @@ function PersonalExpenseDrawer({
         <div className="grid gap-5">
           <FieldLabel htmlFor="expense-type">
             Type
-            <select
-              className={fieldClassName}
+            <SelectField
               id="expense-type"
-              onChange={(event) =>
-                onUpdate({ type: event.target.value as PersonalExpenseType })
+              onValueChange={(value) =>
+                onUpdate({ type: value as PersonalExpenseType })
               }
               value={draft.type}
-            >
-              {personalExpenseTypes.map((type) => (
-                <option key={type} value={type}>
-                  {typeLabels[type]}
-                </option>
-              ))}
-            </select>
+              options={personalExpenseTypes.map((type) => ({
+                value: type,
+                label: typeLabels[type],
+              }))}
+            />
           </FieldLabel>
 
           <FieldLabel htmlFor="expense-label">
@@ -114,7 +112,8 @@ function PersonalExpenseDrawer({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <FieldLabel htmlFor="expense-supplier">
-              Fournisseur <span className="font-normal text-slate-400">(facultatif)</span>
+              Fournisseur{" "}
+              <span className="font-normal text-slate-400">(facultatif)</span>
               <input
                 className={fieldClassName}
                 id="expense-supplier"
@@ -143,13 +142,16 @@ function PersonalExpenseDrawer({
               <input
                 className={fieldClassName}
                 id="expense-date"
-                onChange={(event) => onUpdate({ expenseDate: event.target.value })}
+                onChange={(event) =>
+                  onUpdate({ expenseDate: event.target.value })
+                }
                 type="date"
                 value={draft.expenseDate}
               />
             </FieldLabel>
             <FieldLabel htmlFor="planned-reimbursement-date">
-              Remboursement prévu <span className="font-normal text-slate-400">(facultatif)</span>
+              Remboursement prévu{" "}
+              <span className="font-normal text-slate-400">(facultatif)</span>
               <input
                 className={fieldClassName}
                 id="planned-reimbursement-date"
@@ -163,12 +165,13 @@ function PersonalExpenseDrawer({
           </div>
 
           <div className="border border-seno-100 bg-seno-50 px-3 py-2.5 text-sm leading-5 text-seno-900">
-            Affectation : entreprise. Le rattachement à un chantier sera disponible
-            lorsque les chantiers seront gérés dans l’application.
+            Affectation : entreprise. Le rattachement à un chantier sera
+            disponible lorsque les chantiers seront gérés dans l’application.
           </div>
 
           <FieldLabel htmlFor="expense-comment">
-            Commentaire <span className="font-normal text-slate-400">(facultatif)</span>
+            Commentaire{" "}
+            <span className="font-normal text-slate-400">(facultatif)</span>
             <textarea
               className={textAreaClassName}
               id="expense-comment"
@@ -180,7 +183,10 @@ function PersonalExpenseDrawer({
           </FieldLabel>
 
           {errorMessage ? (
-            <p className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+            <p
+              className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+              role="alert"
+            >
               {errorMessage}
             </p>
           ) : null}
@@ -230,7 +236,9 @@ function ReimbursementDrawer({
         </p>
         <div className="mt-5 border border-slate-200 bg-slate-50 px-4 py-3">
           <p className="text-sm font-medium text-slate-800">{expense.label}</p>
-          <p className="mt-1 text-sm text-slate-500">{formatCurrency(expense.amount)}</p>
+          <p className="mt-1 text-sm text-slate-500">
+            {formatCurrency(expense.amount)}
+          </p>
         </div>
         <FieldLabel htmlFor="reimbursement-date">
           <span className="mt-5">Date de remboursement</span>
@@ -244,7 +252,10 @@ function ReimbursementDrawer({
           />
         </FieldLabel>
         {errorMessage ? (
-          <p className="mt-4 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+          <p
+            className="mt-4 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+            role="alert"
+          >
             {errorMessage}
           </p>
         ) : null}
@@ -278,14 +289,15 @@ export function RemboursementsPePage() {
     queryKey: ["finance-snapshot"],
   });
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState<"ALL" | PersonalExpenseType>("ALL");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING" | "REIMBURSED">(
+  const [typeFilter, setTypeFilter] = useState<"ALL" | PersonalExpenseType>(
     "ALL",
   );
+  const [statusFilter, setStatusFilter] = useState<
+    "ALL" | "PENDING" | "REIMBURSED"
+  >("ALL");
   const [draft, setDraft] = useState<PersonalExpenseDraft | null>(null);
-  const [expenseToReimburse, setExpenseToReimburse] = useState<PersonalExpense | null>(
-    null,
-  );
+  const [expenseToReimburse, setExpenseToReimburse] =
+    useState<PersonalExpense | null>(null);
 
   const invalidateFinance = () =>
     queryClient.invalidateQueries({ queryKey: ["finance-snapshot"] });
@@ -297,14 +309,18 @@ export function RemboursementsPePage() {
 
       const amount = parseAmount(nextDraft.amount);
       if (!nextDraft.label.trim() || !amount || !nextDraft.expenseDate) {
-        throw new Error("Renseignez le libellé, le montant et la date de dépense.");
+        throw new Error(
+          "Renseignez le libellé, le montant et la date de dépense.",
+        );
       }
 
       if (
         nextDraft.plannedReimbursementDate &&
         nextDraft.plannedReimbursementDate < nextDraft.expenseDate
       ) {
-        throw new Error("Le remboursement prévu ne peut pas précéder la dépense.");
+        throw new Error(
+          "Le remboursement prévu ne peut pas précéder la dépense.",
+        );
       }
 
       const payload = {
@@ -348,12 +364,17 @@ export function RemboursementsPePage() {
       const matchesType = typeFilter === "ALL" || expense.type === typeFilter;
       const matchesStatus =
         statusFilter === "ALL" ||
-        (statusFilter === "PENDING" ? !expense.reimbursedAt : Boolean(expense.reimbursedAt));
-      const haystack = `${expense.label} ${expense.supplier} ${expense.comment}`.toLocaleLowerCase(
-        "fr-FR",
-      );
+        (statusFilter === "PENDING"
+          ? !expense.reimbursedAt
+          : Boolean(expense.reimbursedAt));
+      const haystack =
+        `${expense.label} ${expense.supplier} ${expense.comment}`.toLocaleLowerCase(
+          "fr-FR",
+        );
 
-      return matchesType && matchesStatus && haystack.includes(normalizedSearch);
+      return (
+        matchesType && matchesStatus && haystack.includes(normalizedSearch)
+      );
     });
   }, [expenses, search, statusFilter, typeFilter]);
   const pendingTotal = (expenses ?? emptyExpenses)
@@ -375,8 +396,8 @@ export function RemboursementsPePage() {
     return (
       <PageCanvas title="Remboursements PE">
         <div className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger les remboursements. Vérifiez que la migration a bien
-          été appliquée, puis réessayez.
+          Impossible de charger les remboursements. Vérifiez que la migration a
+          bien été appliquée, puis réessayez.
         </div>
       </PageCanvas>
     );
@@ -441,33 +462,34 @@ export function RemboursementsPePage() {
             />
           </label>
           <div className="flex flex-wrap gap-2">
-            <select
+            <SelectField
               aria-label="Filtrer par type"
-              className="h-10 border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-              onChange={(event) =>
-                setTypeFilter(event.target.value as "ALL" | PersonalExpenseType)
+              onValueChange={(value) =>
+                setTypeFilter(value as "ALL" | PersonalExpenseType)
               }
               value={typeFilter}
-            >
-              <option value="ALL">Tous les types</option>
-              {personalExpenseTypes.map((type) => (
-                <option key={type} value={type}>
-                  {typeLabels[type]}
-                </option>
-              ))}
-            </select>
-            <select
+              className="w-auto"
+              options={[
+                { value: "ALL", label: "Tous les types" },
+                ...personalExpenseTypes.map((type) => ({
+                  value: type,
+                  label: typeLabels[type],
+                })),
+              ]}
+            />
+            <SelectField
               aria-label="Filtrer par statut"
-              className="h-10 border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-seno-700 focus:ring-2 focus:ring-seno-700/15"
-              onChange={(event) =>
-                setStatusFilter(event.target.value as "ALL" | "PENDING" | "REIMBURSED")
+              onValueChange={(value) =>
+                setStatusFilter(value as "ALL" | "PENDING" | "REIMBURSED")
               }
               value={statusFilter}
-            >
-              <option value="ALL">Tous les statuts</option>
-              <option value="PENDING">À rembourser</option>
-              <option value="REIMBURSED">Remboursés</option>
-            </select>
+              className="w-auto"
+              options={[
+                { value: "ALL", label: "Tous les statuts" },
+                { value: "PENDING", label: "À rembourser" },
+                { value: "REIMBURSED", label: "Remboursés" },
+              ]}
+            />
           </div>
         </div>
 
@@ -477,8 +499,12 @@ export function RemboursementsPePage() {
               <tr>
                 <th className="px-4 py-3 font-semibold">Date</th>
                 <th className="px-4 py-3 font-semibold">Type</th>
-                <th className="px-4 py-3 font-semibold">Libellé / fournisseur</th>
-                <th className="px-4 py-3 text-right font-semibold">Montant TTC</th>
+                <th className="px-4 py-3 font-semibold">
+                  Libellé / fournisseur
+                </th>
+                <th className="px-4 py-3 text-right font-semibold">
+                  Montant TTC
+                </th>
                 <th className="px-4 py-3 font-semibold">Affectation</th>
                 <th className="px-4 py-3 font-semibold">Remb. prévu</th>
                 <th className="px-4 py-3 font-semibold">Statut</th>
@@ -489,7 +515,10 @@ export function RemboursementsPePage() {
               {visibleExpenses.map((expense) => {
                 const isReimbursed = Boolean(expense.reimbursedAt);
                 return (
-                  <tr className="transition-colors hover:bg-slate-50" key={expense.id}>
+                  <tr
+                    className="transition-colors hover:bg-slate-50"
+                    key={expense.id}
+                  >
                     <td className="px-4 py-3 text-sm text-slate-600">
                       {formatDate(expense.expenseDate)}
                     </td>
@@ -509,7 +538,9 @@ export function RemboursementsPePage() {
                     <td className="px-4 py-3 text-right text-sm font-semibold text-slate-800">
                       {formatCurrency(expense.amount)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">Entreprise</td>
+                    <td className="px-4 py-3 text-sm text-slate-600">
+                      Entreprise
+                    </td>
                     <td className="px-4 py-3 text-sm text-slate-600">
                       {formatDate(expense.plannedReimbursementDate)}
                     </td>
@@ -556,7 +587,11 @@ export function RemboursementsPePage() {
                             className="grid size-8 cursor-pointer place-items-center border border-red-200 text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={deleteMutation.isPending}
                             onClick={() => {
-                              if (window.confirm(`Supprimer la dépense « ${expense.label} » ?`)) {
+                              if (
+                                window.confirm(
+                                  `Supprimer la dépense « ${expense.label} » ?`,
+                                )
+                              ) {
                                 deleteMutation.mutate(expense.id);
                               }
                             }}
@@ -566,7 +601,9 @@ export function RemboursementsPePage() {
                           </button>
                         </div>
                       ) : (
-                        <span className="block text-right text-xs text-slate-400">Verrouillé</span>
+                        <span className="block text-right text-xs text-slate-400">
+                          Verrouillé
+                        </span>
                       )}
                     </td>
                   </tr>
@@ -592,7 +629,10 @@ export function RemboursementsPePage() {
       </FinancePanel>
 
       {deleteMutation.isError ? (
-        <p className="mt-3 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+        <p
+          className="mt-3 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          role="alert"
+        >
           {deleteMutation.error instanceof Error
             ? deleteMutation.error.message
             : "La dépense n’a pas pu être supprimée."}
@@ -610,14 +650,19 @@ export function RemboursementsPePage() {
           isSaving={saveMutation.isPending}
           onClose={() => setDraft(null)}
           onSave={() => saveMutation.mutate(draft)}
-          onUpdate={(patch) => setDraft((current) => (current ? { ...current, ...patch } : current))}
+          onUpdate={(patch) =>
+            setDraft((current) =>
+              current ? { ...current, ...patch } : current,
+            )
+          }
         />
       ) : null}
 
       {expenseToReimburse ? (
         <ReimbursementDrawer
           errorMessage={
-            reimbursementMutation.isError && reimbursementMutation.error instanceof Error
+            reimbursementMutation.isError &&
+            reimbursementMutation.error instanceof Error
               ? reimbursementMutation.error.message
               : null
           }

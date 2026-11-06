@@ -1,3 +1,4 @@
+import { SelectField } from "@/shared/components/SelectField";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, FileUp } from "lucide-react";
@@ -168,7 +169,7 @@ export function ChantierCreatePage() {
         setSummary(parsed);
         setDraft((current) => ({
           ...current,
-          address: parsed.projectAddress,
+          address: parsed.projectAddress.replace(/\s+/gu, " ").trim(),
           clientId: matchingClient?.id ?? "",
           name: parsed.projectTitle,
           quoteNumber: parsed.quoteNumber,
@@ -377,24 +378,21 @@ export function ChantierCreatePage() {
                       />
                     </FieldLabel>
                     <FieldLabel label="Client *">
-                      <select
-                        className={inputClassName}
+                      <SelectField
                         disabled={
                           quoteFieldsLocked || Boolean(existingQuote?.clientId)
                         }
                         required
                         value={effectiveDraft.clientId}
-                        onChange={(event) =>
-                          setField("clientId", event.target.value)
-                        }
-                      >
-                        <option value="">Sélectionner un client</option>
-                        {availableClients.map((client) => (
-                          <option key={client.id} value={client.id}>
-                            {client.name}
-                          </option>
-                        ))}
-                      </select>
+                        onValueChange={(value) => setField("clientId", value)}
+                        options={[
+                          { value: "", label: "Sélectionner un client" },
+                          ...availableClients.map((client) => ({
+                            value: client.id,
+                            label: client.name,
+                          })),
+                        ]}
+                      />
                     </FieldLabel>
                   </div>
                   {availableClients.length === 0 ? (
@@ -424,22 +422,16 @@ export function ChantierCreatePage() {
                   </FieldLabel>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <FieldLabel label="Statut du chantier">
-                      <select
-                        className={inputClassName}
+                      <SelectField
                         value={draft.status}
-                        onChange={(event) =>
-                          setField(
-                            "status",
-                            event.target.value as ChantierStatus,
-                          )
+                        onValueChange={(value) =>
+                          setField("status", value as ChantierStatus)
                         }
-                      >
-                        {chantierStatuses.map((status) => (
-                          <option key={status} value={status}>
-                            {statusLabels[status]}
-                          </option>
-                        ))}
-                      </select>
+                        options={chantierStatuses.map((status) => ({
+                          value: status,
+                          label: statusLabels[status],
+                        }))}
+                      />
                     </FieldLabel>
                     <FieldLabel label="Montant du devis HT">
                       <input

@@ -1,3 +1,4 @@
+import { SelectField } from "@/shared/components/SelectField";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CalendarDays,
@@ -276,51 +277,42 @@ function ProspectForm({
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <FieldLabel label="Statut">
-            <select
-              className={inputClassName}
-              onChange={(event) =>
-                update("status", event.target.value as ProspectStatus)
+            <SelectField
+              onValueChange={(value) =>
+                update("status", value as ProspectStatus)
               }
               value={draft.status}
-            >
-              {prospectStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {prospectStatusLabels[status]}
-                </option>
-              ))}
-            </select>
+              options={prospectStatuses.map((status) => ({
+                value: status,
+                label: prospectStatusLabels[status],
+              }))}
+            />
           </FieldLabel>
           <FieldLabel label="Priorité">
-            <select
-              className={inputClassName}
-              onChange={(event) =>
-                update("priority", event.target.value as ProspectPriority)
+            <SelectField
+              onValueChange={(value) =>
+                update("priority", value as ProspectPriority)
               }
               value={draft.priority}
-            >
-              {prospectPriorities.map((priority) => (
-                <option key={priority} value={priority}>
-                  {priorityLabels[priority]}
-                </option>
-              ))}
-            </select>
+              options={prospectPriorities.map((priority) => ({
+                value: priority,
+                label: priorityLabels[priority],
+              }))}
+            />
           </FieldLabel>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <FieldLabel label="Origine">
-            <select
-              className={inputClassName}
-              onChange={(event) =>
-                update("sourceKind", event.target.value as SourceKind)
+            <SelectField
+              onValueChange={(value) =>
+                update("sourceKind", value as SourceKind)
               }
               value={draft.sourceKind}
-            >
-              {sourceKinds.map((source) => (
-                <option key={source} value={source}>
-                  {sourceLabels[source]}
-                </option>
-              ))}
-            </select>
+              options={sourceKinds.map((source) => ({
+                value: source,
+                label: sourceLabels[source],
+              }))}
+            />
           </FieldLabel>
           <FieldLabel label="Précision">
             <input
@@ -342,36 +334,32 @@ function ProspectForm({
         </FieldLabel>
         <div className="grid gap-3 sm:grid-cols-2">
           <FieldLabel label="Événement d’origine">
-            <select
-              className={inputClassName}
-              onChange={(event) =>
-                update("originEventId", event.target.value || null)
-              }
+            <SelectField
+              onValueChange={(value) => update("originEventId", value || null)}
               value={draft.originEventId ?? ""}
-            >
-              <option value="">Aucun</option>
-              {events.map((entry) => (
-                <option key={entry.id} value={entry.id}>
-                  {entry.name}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: "", label: "Aucun" },
+                ...events.map((entry) => ({
+                  value: entry.id,
+                  label: entry.name,
+                })),
+              ]}
+            />
           </FieldLabel>
           <FieldLabel label="Action d’origine">
-            <select
-              className={inputClassName}
-              onChange={(event) =>
-                update("originCommunicationId", event.target.value || null)
+            <SelectField
+              onValueChange={(value) =>
+                update("originCommunicationId", value || null)
               }
               value={draft.originCommunicationId ?? ""}
-            >
-              <option value="">Aucune</option>
-              {communications.map((entry) => (
-                <option key={entry.id} value={entry.id}>
-                  {entry.name}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: "", label: "Aucune" },
+                ...communications.map((entry) => ({
+                  value: entry.id,
+                  label: entry.name,
+                })),
+              ]}
+            />
           </FieldLabel>
         </div>
         <FieldLabel label="Notes">
@@ -409,22 +397,16 @@ function ProspectForm({
           <div className="grid gap-3 border border-seno-100 bg-seno-50/50 p-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <FieldLabel label="Type">
-                <select
-                  className={inputClassName}
-                  onChange={(event) =>
-                    update(
-                      "interactionType",
-                      event.target.value as InteractionType,
-                    )
+                <SelectField
+                  onValueChange={(value) =>
+                    update("interactionType", value as InteractionType)
                   }
                   value={draft.interactionType}
-                >
-                  {interactionTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {interactionLabels[type]}
-                    </option>
-                  ))}
-                </select>
+                  options={interactionTypes.map((type) => ({
+                    value: type,
+                    label: interactionLabels[type],
+                  }))}
+                />
               </FieldLabel>
               <FieldLabel label="Prochaine relance">
                 <input
@@ -523,19 +505,14 @@ function EventForm({
           />
         </FieldLabel>
         <FieldLabel label="Statut">
-          <select
-            className={inputClassName}
-            onChange={(event) =>
-              update("status", event.target.value as EventStatus)
-            }
+          <SelectField
+            onValueChange={(value) => update("status", value as EventStatus)}
             value={draft.status}
-          >
-            {eventStatuses.map((status) => (
-              <option key={status} value={status}>
-                {eventStatusLabels[status]}
-              </option>
-            ))}
-          </select>
+            options={eventStatuses.map((status) => ({
+              value: status,
+              label: eventStatusLabels[status],
+            }))}
+          />
         </FieldLabel>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -598,19 +575,16 @@ function CommunicationForm({
           />
         </FieldLabel>
         <FieldLabel label="Statut">
-          <select
-            className={inputClassName}
-            onChange={(event) =>
-              update("status", event.target.value as CommunicationStatus)
+          <SelectField
+            onValueChange={(value) =>
+              update("status", value as CommunicationStatus)
             }
             value={draft.status}
-          >
-            {communicationStatuses.map((status) => (
-              <option key={status} value={status}>
-                {communicationStatusLabels[status]}
-              </option>
-            ))}
-          </select>
+            options={communicationStatuses.map((status) => ({
+              value: status,
+              label: communicationStatusLabels[status],
+            }))}
+          />
         </FieldLabel>
       </div>
       <FieldLabel label="Période">
@@ -1017,55 +991,51 @@ export function ProspectionPage() {
                 ))}
               </div>
               <div className="grid gap-2 sm:grid-cols-3">
-                <select
+                <SelectField
                   aria-label="Filtrer par statut"
-                  className="h-9 border border-slate-300 bg-white px-2 text-xs text-slate-700"
-                  onChange={(event) =>
-                    setStatusFilter(
-                      event.target.value as ProspectStatus | "ALL",
-                    )
+                  onValueChange={(value) =>
+                    setStatusFilter(value as ProspectStatus | "ALL")
                   }
                   value={statusFilter}
-                >
-                  <option value="ALL">Tous les statuts</option>
-                  {prospectStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {prospectStatusLabels[status]}
-                    </option>
-                  ))}
-                </select>
-                <select
+                  className="w-auto"
+                  options={[
+                    { value: "ALL", label: "Tous les statuts" },
+                    ...prospectStatuses.map((status) => ({
+                      value: status,
+                      label: prospectStatusLabels[status],
+                    })),
+                  ]}
+                />
+                <SelectField
                   aria-label="Filtrer par priorité"
-                  className="h-9 border border-slate-300 bg-white px-2 text-xs text-slate-700"
-                  onChange={(event) =>
-                    setPriorityFilter(
-                      event.target.value as ProspectPriority | "ALL",
-                    )
+                  onValueChange={(value) =>
+                    setPriorityFilter(value as ProspectPriority | "ALL")
                   }
                   value={priorityFilter}
-                >
-                  <option value="ALL">Toutes les priorités</option>
-                  {prospectPriorities.map((priority) => (
-                    <option key={priority} value={priority}>
-                      {priorityLabels[priority]}
-                    </option>
-                  ))}
-                </select>
-                <select
+                  className="w-auto"
+                  options={[
+                    { value: "ALL", label: "Toutes les priorités" },
+                    ...prospectPriorities.map((priority) => ({
+                      value: priority,
+                      label: priorityLabels[priority],
+                    })),
+                  ]}
+                />
+                <SelectField
                   aria-label="Filtrer par source"
-                  className="h-9 border border-slate-300 bg-white px-2 text-xs text-slate-700"
-                  onChange={(event) =>
-                    setSourceFilter(event.target.value as SourceKind | "ALL")
+                  onValueChange={(value) =>
+                    setSourceFilter(value as SourceKind | "ALL")
                   }
                   value={sourceFilter}
-                >
-                  <option value="ALL">Toutes les sources</option>
-                  {sourceKinds.map((source) => (
-                    <option key={source} value={source}>
-                      {sourceLabels[source]}
-                    </option>
-                  ))}
-                </select>
+                  className="w-auto"
+                  options={[
+                    { value: "ALL", label: "Toutes les sources" },
+                    ...sourceKinds.map((source) => ({
+                      value: source,
+                      label: sourceLabels[source],
+                    })),
+                  ]}
+                />
               </div>
             </div>
             {prospects.length ? (

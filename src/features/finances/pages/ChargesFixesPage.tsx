@@ -1,3 +1,4 @@
+import { SelectField } from "@/shared/components/SelectField";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Landmark, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -126,20 +127,17 @@ function FixedCostDrawer({
             </FieldLabel>
             <FieldLabel htmlFor="cost-recurrence">
               Fréquence
-              <select
-                className={fieldClassName}
+              <SelectField
                 id="cost-recurrence"
-                onChange={(event) =>
-                  onUpdate({ recurrence: event.target.value as FixedCostRecurrence })
+                onValueChange={(value) =>
+                  onUpdate({ recurrence: value as FixedCostRecurrence })
                 }
                 value={draft.recurrence}
-              >
-                {fixedCostRecurrences.map((recurrence) => (
-                  <option key={recurrence} value={recurrence}>
-                    {recurrenceLabels[recurrence]}
-                  </option>
-                ))}
-              </select>
+                options={fixedCostRecurrences.map((recurrence) => ({
+                  value: recurrence,
+                  label: recurrenceLabels[recurrence],
+                }))}
+              />
             </FieldLabel>
           </div>
 
@@ -191,7 +189,9 @@ function FixedCostDrawer({
                 <input
                   className={cn(fieldClassName, "mt-2 w-full")}
                   id="cost-due-date"
-                  onChange={(event) => onUpdate({ dueDate: event.target.value })}
+                  onChange={(event) =>
+                    onUpdate({ dueDate: event.target.value })
+                  }
                   type="date"
                   value={draft.dueDate}
                 />
@@ -205,13 +205,16 @@ function FixedCostDrawer({
               <input
                 className={fieldClassName}
                 id="cost-start-date"
-                onChange={(event) => onUpdate({ startDate: event.target.value })}
+                onChange={(event) =>
+                  onUpdate({ startDate: event.target.value })
+                }
                 type="date"
                 value={draft.startDate}
               />
             </FieldLabel>
             <FieldLabel htmlFor="cost-end-date">
-              Fin <span className="font-normal text-slate-400">(facultative)</span>
+              Fin{" "}
+              <span className="font-normal text-slate-400">(facultative)</span>
               <input
                 className={fieldClassName}
                 id="cost-end-date"
@@ -246,7 +249,9 @@ function FixedCostDrawer({
               <input
                 checked={draft.isActive}
                 className="size-4 accent-[#00365a]"
-                onChange={(event) => onUpdate({ isActive: event.target.checked })}
+                onChange={(event) =>
+                  onUpdate({ isActive: event.target.checked })
+                }
                 type="checkbox"
               />
               Charge active
@@ -254,7 +259,8 @@ function FixedCostDrawer({
           </div>
 
           <FieldLabel htmlFor="cost-comment">
-            Commentaire <span className="font-normal text-slate-400">(facultatif)</span>
+            Commentaire{" "}
+            <span className="font-normal text-slate-400">(facultatif)</span>
             <textarea
               className={textAreaClassName}
               id="cost-comment"
@@ -266,7 +272,10 @@ function FixedCostDrawer({
           </FieldLabel>
 
           {errorMessage ? (
-            <p className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+            <p
+              className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+              role="alert"
+            >
               {errorMessage}
             </p>
           ) : null}
@@ -315,14 +324,16 @@ export function ChargesFixesPage() {
       const dueDay = Number(nextDraft.dueDay);
       const reminderDaysBefore = Number(nextDraft.reminderDaysBefore);
       const resolvedDueDay = nextDraft.dueMode === "DAY" ? dueDay : null;
-      const resolvedDueDate = nextDraft.dueMode === "DATE" ? nextDraft.dueDate : null;
+      const resolvedDueDate =
+        nextDraft.dueMode === "DATE" ? nextDraft.dueDate : null;
 
       if (!nextDraft.name.trim() || !amount || !nextDraft.startDate) {
         throw new Error("Renseignez le nom, le montant et la date de début.");
       }
 
       if (
-        (nextDraft.dueMode === "DAY" && (!Number.isInteger(dueDay) || dueDay < 1 || dueDay > 31)) ||
+        (nextDraft.dueMode === "DAY" &&
+          (!Number.isInteger(dueDay) || dueDay < 1 || dueDay > 31)) ||
         (nextDraft.dueMode === "DATE" && !nextDraft.dueDate)
       ) {
         throw new Error("Renseignez une échéance valide.");
@@ -337,7 +348,9 @@ export function ChargesFixesPage() {
       }
 
       if (nextDraft.endDate && nextDraft.endDate < nextDraft.startDate) {
-        throw new Error("La date de fin ne peut pas précéder la date de début.");
+        throw new Error(
+          "La date de fin ne peut pas précéder la date de début.",
+        );
       }
 
       const payload = {
@@ -380,7 +393,8 @@ export function ChargesFixesPage() {
       (financeQuery.data?.fixedCosts ?? [])
         .filter((cost) => cost.isActive)
         .reduce(
-          (total, cost) => total + getMonthlyEquivalent(cost.amount, cost.recurrence),
+          (total, cost) =>
+            total + getMonthlyEquivalent(cost.amount, cost.recurrence),
           0,
         ),
     [financeQuery.data?.fixedCosts],
@@ -398,8 +412,8 @@ export function ChargesFixesPage() {
     return (
       <PageCanvas title="Charges fixes">
         <div className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Impossible de charger les charges fixes. Vérifiez que la migration a bien
-          été appliquée, puis réessayez.
+          Impossible de charger les charges fixes. Vérifiez que la migration a
+          bien été appliquée, puis réessayez.
         </div>
       </PageCanvas>
     );
@@ -410,8 +424,8 @@ export function ChargesFixesPage() {
       <div className="mt-2 flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
         <p className="max-w-3xl text-sm leading-6 text-slate-500">
           Coûts récurrents de l’entreprise, indépendants des chantiers. Ils sont
-          mensualisés ici et n’ajoutent pas encore de mouvements automatiques à la
-          trésorerie.
+          mensualisés ici et n’ajoutent pas encore de mouvements automatiques à
+          la trésorerie.
         </p>
         <button
           className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 bg-seno-700 px-4 text-sm font-medium text-white transition-colors hover:bg-seno-800"
@@ -443,7 +457,9 @@ export function ChargesFixesPage() {
               <tr>
                 <th className="px-4 py-3 font-semibold">Charge</th>
                 <th className="px-4 py-3 font-semibold">Catégorie</th>
-                <th className="px-4 py-3 text-right font-semibold">Montant TTC</th>
+                <th className="px-4 py-3 text-right font-semibold">
+                  Montant TTC
+                </th>
                 <th className="px-4 py-3 font-semibold">Fréquence</th>
                 <th className="px-4 py-3 font-semibold">Prochaine échéance</th>
                 <th className="px-4 py-3 font-semibold">Rappel</th>
@@ -536,7 +552,11 @@ export function ChargesFixesPage() {
                           className="grid size-8 cursor-pointer place-items-center border border-red-200 text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                           disabled={deleteMutation.isPending}
                           onClick={() => {
-                            if (window.confirm(`Supprimer la charge « ${cost.name} » ?`)) {
+                            if (
+                              window.confirm(
+                                `Supprimer la charge « ${cost.name} » ?`,
+                              )
+                            ) {
                               deleteMutation.mutate(cost.id);
                             }
                           }}
@@ -565,7 +585,10 @@ export function ChargesFixesPage() {
       </FinancePanel>
 
       {toggleMutation.isError || deleteMutation.isError ? (
-        <p className="mt-3 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+        <p
+          className="mt-3 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          role="alert"
+        >
           {(() => {
             const mutationError = toggleMutation.error ?? deleteMutation.error;
             return mutationError instanceof Error
@@ -586,7 +609,11 @@ export function ChargesFixesPage() {
           isSaving={saveMutation.isPending}
           onClose={() => setDraft(null)}
           onSave={() => saveMutation.mutate(draft)}
-          onUpdate={(patch) => setDraft((current) => (current ? { ...current, ...patch } : current))}
+          onUpdate={(patch) =>
+            setDraft((current) =>
+              current ? { ...current, ...patch } : current,
+            )
+          }
         />
       ) : null}
     </PageCanvas>
